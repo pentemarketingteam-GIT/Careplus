@@ -32,6 +32,25 @@ const ChatPanel = forwardRef(function ChatPanel({ onIntent }, ref) {
       sessionRef.current = existing || crypto.randomUUID();
       localStorage.setItem("careplus-session", sessionRef.current);
     }
+    // Rehydrate conversation from backend
+    (async () => {
+      try {
+        const { data } = await axios.get(`${API}/assistant/history/${sessionRef.current}`);
+        const restored = (data?.messages || []).map((m) => ({
+          role: m.role,
+          content: m.content,
+          intent: m.intent,
+        }));
+        if (restored.length) {
+          setMessages(restored);
+          const lastIntent = [...restored].reverse().find((m) => m.role === "assistant" && m.intent)?.intent;
+          if (lastIntent) onIntent?.(lastIntent);
+        }
+      } catch {
+        /* ignore */
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -141,7 +160,7 @@ const ChatPanel = forwardRef(function ChatPanel({ onIntent }, ref) {
 
       <form
         onSubmit={(e) => { e.preventDefault(); send(); }}
-        className="p-4 border-t border-white/10 flex items-center gap-2"
+        className="p-4 pr-28 md:pr-32 border-t border-white/10 flex items-center gap-2"
         data-testid="chat-form"
       >
         <input
