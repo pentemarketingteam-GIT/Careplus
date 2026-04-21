@@ -16,7 +16,7 @@ const FIELDS = [
   { key: "condition", label: "Condition / reason for care", required: true, type: "text" },
   { key: "service", label: "Service needed", required: true, type: "select", options: ["skilled-nursing", "physical-therapy", "occupational-therapy", "speech-therapy", "home-health-aide", "medical-social-work"] },
   { key: "urgency", label: "Urgency", required: false, type: "select", options: ["routine", "soon", "urgent"] },
-  { key: "preferred_contact_time", label: "Preferred contact time", required: false, type: "text" },
+  { key: "preferred_contact_time", label: "Preferred contact time", required: false, type: "time" },
   { key: "insurance_provider", label: "Insurance provider", required: false, type: "text" },
   { key: "insurance_id", label: "Insurance member ID", required: false, type: "text" },
 ];

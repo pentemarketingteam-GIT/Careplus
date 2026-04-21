@@ -1,58 +1,56 @@
-# Careplus Health Services — Dual-Mode Interactive Website
+# Careplus Health Services — Dual-Mode Interactive Website + AI Intake
 
-## Original Problem Statement
-Started: "can you build a website?" with https://careplus-usa.lovable.app/ as inspiration.
-Grew into: dual-mode site (static marketing + AI-powered dynamic) with 10 interactive features + real testimonials + Forest Apothecary palette.
+## Original Problem Statement (evolving)
+Start: "can you build a website?" with https://careplus-usa.lovable.app/ as inspiration. Now a production-ready **dual-mode interactive healthcare site** with an AI-guided patient intake flow, optional Google sign-in, voice interaction, and a dynamic visual experience.
 
 ## Architecture
 - **Frontend**: React 19 + Router 7 + Tailwind + framer-motion + sonner + lucide-react + canvas-confetti.
-- **Backend**: FastAPI + Motor (async MongoDB) + emergentintegrations (Claude Sonnet 4.5 chat + OpenAI TTS-1 coral voice).
-- **Styling**: Forest Apothecary — parchment #F4F1EA + deep forest #2D4A2B + mustard #C9A227 accent (static); pine-black #0A1410 + mustard glow + moss ambient (dynamic). Cormorant Garamond / Outfit / Manrope.
-- **Collections**: contacts, referrals, surveys, appointments, chat_messages.
+- **Backend**: FastAPI + Motor (async MongoDB) + emergentintegrations (Claude Sonnet 4.5 for chat + OpenAI TTS-1 coral voice). httpx for Emergent OAuth session exchange.
+- **Auth**: Optional Emergent-managed Google social login. httpOnly `session_token` cookie (7-day), Authorization Bearer fallback. Guest mode is the default.
+- **Palette**: Forest Apothecary — parchment + deep forest + mustard (static); pine-black + mustard glow + moss ambient (dynamic).
+- **Collections**: users, user_sessions, contacts, referrals, surveys, appointments, chat_messages, intakes.
 
 ## User Personas
-- Families/patients seeking home healthcare in Dallas area
-- Potential hires (RN, PT, OT, SLP, HHA, MSW)
-- Existing clients sharing satisfaction feedback
+- Families/patients seeking home healthcare in Dallas (guest or signed-in)
+- Returning users wanting saved intake + booking history
+- Potential hires, existing clients giving feedback
 
-## Core Requirements (static)
-Multi-page static site (Home, About, Services, Careers, Resources, Contact) + dynamic AI experience at /ai with intent-driven left-panel views.
+## Core Capabilities
+1. **Static site**: Home, About, Services, Careers, Resources, Contact.
+2. **Dynamic AI site** at `/ai`: intent-driven left-panel view switcher controlled by Claude Sonnet 4.5 chat.
+3. **Optional auth** — Sign in with Google via Emergent OAuth or continue as guest.
+4. **AI-guided patient intake** — conversational flow collects 10 fields; IntakeWizard mirrors extraction live; submits to /api/appointments.
+5. **Voice mode** — Web Speech API mic for STT + OpenAI TTS playback on every AI reply.
+6. 10 interactive features: ambient particles, intent-reactive color, typing/thinking glow, line-art illustrations, body diagram, find-care wizard, team flip cards, visit tour, confetti on submit, testimonials.
 
-## What's Been Implemented
+## What's Been Implemented (chronological)
 
-**Iter 1 — Static MVP**: 6 pages, contact/referral/survey/appointment endpoints, Mongo storage.
+**Iter 1** — Static MVP: 6 pages + 4 form endpoints + MongoDB.
+**Iter 2** — AI dynamic mode: Claude Sonnet 4.5 chat, intent routing, left-panel switcher.
+**Iter 3** — Forest Apothecary palette applied globally.
+**Iter 4** — 10 interactive features + 3 testimonials on both static + dynamic.
+**Iter 5 (this session)** — Optional Emergent Google Auth (guest-first) + AI patient intake:
+- `/api/auth/session`, `/api/auth/me`, `/api/auth/logout` (httpOnly cookie + Bearer fallback).
+- `/api/intake/{sid}` GET/PATCH + `/api/intake/{sid}/submit` POST — writes to `appointments` with `source: 'ai_intake'` and optional `user_id`.
+- `/api/assistant/chat` now extracts intake fields from every user message and auto-persists to `db.intakes`.
+- IntakeWizard component: live form with progress bar, 10 fields (name, phone, email, caregiver relationship, condition, service, urgency, preferred contact time, insurance provider, insurance ID), guest banner with inline sign-in.
+- AuthButton (light + dark variants) in Header and /ai top bar.
+- AuthContext with race-condition-safe `/me` check (skipped when `session_id` in hash).
+- AuthCallback page with synchronous `useRef` guard against StrictMode double-invocation.
 
-**Iter 2 — AI Dynamic mode**: /api/assistant/chat with Claude Sonnet 4.5, /ai split layout, intent routing (11 intents), rehydration on reload, mode toggle, 25+ data-testids.
-
-**Iter 3 (palette)** — Forest Apothecary applied globally; service images switched to reliable Pexels URLs.
-
-**Iter 4 — 10 Interactive features + Testimonials**
-1. Living ambient particles (14 drifting breath-orbs, hue shifts per intent)
-2. Intent-reactive ambient color (welcome→mustard, contact→forest, careers→moss, etc.)
-3. Typing-responsive glow on chat input; thinking aura on left panel while AI works
-4. Hand-drawn animated SVG illustrations for all 6 services (self-drawing on view entry)
-5. AI voice mode — Web Speech API mic input + OpenAI TTS-1 "coral" voice playback per assistant message (POST /api/assistant/tts → base64 mp3)
-6. Body diagram "Where does it hurt?" with 7 clickable regions auto-generating AI prompt
-7. "Help me find the right care" card-stack with 6 guided options
-8. Team flip cards (4 clinicians, tap to reveal bio) for action:meet_team intent
-9. Gratitude confetti + personalized first-name thank-you toast on every form submit
-10. "Tour of a visit" 5-step animated scroll for action:tour_visit intent
-- 3 real testimonials (Sarah J., Robert M., Elena R., all 5-star) rendered on static Home + dynamic AboutView + as callout on service-detail views.
-
-### New intents added
-action:find_care, action:meet_team, action:tour_visit, action:symptom_check — all verified routing end-to-end with Claude.
-
-## Testing status
-- Backend: **26/26 pytest passing** (includes 4 new-intent tests + 3 TTS tests).
-- Frontend: 100% pass on all iter-6 features (welcome chips, mic, TTS, confetti, intent→view transitions, testimonials, mode toggle regression).
+## Testing Status
+- **Backend: 42/42 pytest passing** (26 regression + 16 new auth/intake/extraction).
+- **Frontend: 100%** — all iter-7 flows verified by testing agent (intake auto-fill from chat, guest submit, auth button, mode toggle, all 10 iter-4 features intact).
+- Seeded test user in /app/memory/test_credentials.md for future agents.
 
 ## Prioritized Backlog
-- **P2**: Replace native date input with shadcn Calendar in dynamic appointment form for visual consistency.
-- **P2**: Admin auth + protected GET endpoints for contacts/referrals (PHI risk pre-production).
-- **P2**: SendGrid/Resend email notifications on every form submission.
-- **P2**: Deduplicate mobile+desktop ChatPanel instances (minor duplicate history fetch).
-- **P3**: Streaming LLM responses, Spanish i18n, rate-limiting on /api/assistant endpoints, appointment calendar time-slots.
+- **P2**: Split server.py into modules (auth.py, intake.py, assistant.py, models.py) — nearing 700 lines.
+- **P2**: SendGrid/Resend email notifications on appointment + referral + intake submit.
+- **P2**: Admin dashboard (authenticated staff role) for reviewing intake/appointments/referrals.
+- **P2**: shadcn Calendar for appointment date fields (replace native pickers).
+- **P2**: Swallow 401s from /auth/me as non-error state to reduce console noise.
+- **P3**: Streaming LLM responses, Spanish i18n, rate-limiting on /assistant + /auth/session, claim-guest-intake-on-login flow.
 
 ## Next Actions
-- Gather user feedback on new interactive features.
-- Decide on P2 items (email notifications, admin auth) for production readiness.
+- User review of the intake experience.
+- Decide on P2 items: email notifications, admin dashboard.
