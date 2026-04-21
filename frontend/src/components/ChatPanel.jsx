@@ -160,21 +160,21 @@ const ChatPanel = forwardRef(function ChatPanel({ onIntent }, ref) {
 
       <form
         onSubmit={(e) => { e.preventDefault(); send(); }}
-        className="p-4 pr-4 pb-16 md:pb-4 md:pr-48 border-t border-white/10 flex items-center gap-2"
+        className="p-4 pr-4 pb-16 md:pb-16 md:pr-56 border-t border-white/10 flex items-center gap-2"
         data-testid="chat-form"
       >
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask about care services..."
-          className="flex-1 bg-white/[0.04] border border-white/10 rounded-full px-5 py-3 text-[#F3EFE6] placeholder:text-white/30 outline-none focus:border-[#E07A5F]"
+          className="flex-1 min-w-0 bg-white/[0.04] border border-white/10 rounded-full px-5 py-3 text-[#F3EFE6] placeholder:text-white/30 outline-none focus:border-[#E07A5F]"
           data-testid="chat-input"
           disabled={busy}
         />
         <button
           type="submit"
           disabled={busy || !input.trim()}
-          className="h-11 w-11 rounded-full flex items-center justify-center text-white disabled:opacity-40"
+          className="shrink-0 h-11 w-11 rounded-full flex items-center justify-center text-white disabled:opacity-40"
           style={{ background: "linear-gradient(135deg, #E07A5F, #C17767)" }}
           data-testid="chat-send-btn"
           aria-label="Send"
