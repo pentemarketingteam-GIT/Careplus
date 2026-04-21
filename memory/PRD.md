@@ -1,53 +1,54 @@
-# Careplus Health Services — Marketing Website
+# Careplus Health Services — Dual-Mode Website (Static + AI Dynamic)
 
 ## Original Problem Statement
-User asked: "can you build an website?" — provided https://careplus-usa.lovable.app/ as inspiration. Chose "Inspired by (same vibe but improved/customized)" and asked to keep original content/copy from the Lovable reference.
+Initial: "can you build a website?" with reference https://careplus-usa.lovable.app/ (home healthcare agency).
+Follow-up: Add a **dual-mode experience** — keep the static marketing site AND add a dynamic AI-powered experience where an AI assistant chats with users and the left panel changes in real-time based on the conversation (services, about, contact, appointment booking, referral).
 
 ## Architecture
-- **Frontend**: React 19 + React Router 7 + TailwindCSS + framer-motion + sonner (toasts) + lucide-react (icons). Custom "Organic & Earthy" theme (sage #4A6741 + terracotta #C17767 + warm cream #FDFBF7), typography: Cormorant Garamond (display) + Outfit (body) + Manrope (labels).
-- **Backend**: FastAPI + Motor (async MongoDB). Endpoints all prefixed `/api`. Collections: `contacts`, `referrals`, `surveys`, `appointments`.
-- **No authentication** (marketing MVP).
+- **Frontend**: React 19 + React Router 7 + TailwindCSS + framer-motion + sonner + lucide-react. "Organic & Earthy" palette (sage, terracotta, warm cream) on static; deep midnight + terracotta accents on dynamic. Typography: Cormorant Garamond + Outfit + Manrope.
+- **Backend**: FastAPI + Motor (async MongoDB) + emergentintegrations (Claude Sonnet 4.5). Collections: `contacts`, `referrals`, `surveys`, `appointments`, `chat_messages`.
+- **AI**: Anthropic Claude Sonnet 4.5 via Emergent universal LLM key. Each user message → LLM returns a structured JSON `{reply, intent, suggestions}`. Intent drives the left-panel view on `/ai`.
+- **Mode toggle**: fixed-position `+STATIC / +DYNAMIC` pill auto-synced with the current route (`/` vs `/ai`). Session id persists in localStorage; chat history rehydrates from backend on reload.
 
 ## User Personas
-- **Families / patients** seeking home healthcare in Dallas area — browse services, submit referrals, set appointments.
-- **Potential hires** (nurses, therapists, aides) — view careers, apply.
-- **Existing clients** — submit satisfaction surveys and feedback.
+- Families/patients seeking home healthcare — browse services, converse with AI, book appointments, submit referrals.
+- Potential hires — view Careers (both modes).
+- Existing clients — submit Client Satisfaction Survey.
 
-## Core Requirements (static)
-1. Multi-page marketing site with six pages: Home, About, Services, Careers, Resources, Contact.
-2. Full brand copy preserved from reference site (hero, welcome, services list, quick access cards).
-3. Primary CTAs: click-to-call 214-234-1612 and appointment/contact form.
-4. Referral submission form with two sections (about you / about patient).
-5. Client satisfaction survey with 1–5 star rating.
-6. Distinctive, non-clinical visual design (avoid medical-blue cliché).
+## Core Requirements
+1. Full static marketing site: Home, About, Services, Careers, Resources, Contact (preserves original copy).
+2. Dynamic AI experience `/ai`: dark split layout — left panel renders dynamic view (Welcome, Service detail x6, About, Contact, Careers, Services grid, Book Appointment, Submit Referral, Share Feedback) driven by AI intent.
+3. Right-side chat panel with Claude Sonnet 4.5, multi-turn memory, suggestion chips, typing indicator.
+4. Mode toggle at top-center; visual state matches current URL.
+5. All forms persist to MongoDB with UUID ids.
+6. Distinctive, non-clinical aesthetic across both modes.
 
-## What's Been Implemented (2026-04-21)
-- Backend endpoints:
-  - `GET /api/` (health), `GET /api/services` (6 service catalogue)
-  - `POST /api/contact` + `GET /api/contact`
-  - `POST /api/referrals` + `GET /api/referrals`
-  - `POST /api/survey`
-  - `POST /api/appointments`
-- Frontend pages (all mobile-responsive with framer-motion entrance animations):
-  - **Home**: asymmetric hero with floating glass card, 3-up bento quick-access (Service Areas, Survey, Referrals), welcome section with "Home Health Care is" bullets + photo + 15+ yrs stat, services grid (6 cards), dark CTA strip with grain texture.
-  - **About**: hero, image + 4-value grid (Compassion/Safety/Partnership/Quality), tan resource box.
-  - **Services**: alternating image/content rows for all 6 services with per-service CTAs.
-  - **Careers**: hero, 4 perks, 6 open positions with Apply buttons.
-  - **Resources**: 4-item FAQ accordion + Client Satisfaction Survey form with 5-star rating.
-  - **Contact**: 2 tabs (Contact/Appointment + Referral), sidebar with phone/email/hours + urgent call card.
-- Forms persist to MongoDB with UUID ids + ISO timestamps; `_id` excluded on reads.
-- Glassmorphism sticky header, mobile hamburger menu, deep dark footer with nav + contact.
-- Toast notifications via Sonner for form feedback.
-- Testing: backend 15/15 pytest passing; frontend 25/25 passing after survey empty-email fix.
+## What's Been Implemented
+**Iter 1 (2026-04-21) — Static site MVP**
+- 6 pages, full Lovable copy preserved, 4 backend form endpoints (contact, referrals, survey, appointments), services catalog, MongoDB storage, glass nav, dark footer, framer-motion animations.
+
+**Iter 2 (2026-04-21) — AI Dynamic mode**
+- `/api/assistant/chat` + `/api/assistant/history/{session_id}` backend endpoints (Claude Sonnet 4.5 via emergentintegrations).
+- `/ai` route with split-screen: DynamicView (left) + ChatPanel (right).
+- Intent system with 15+ intents driving left-panel views (welcome / page:about / page:contact / page:careers / page:services / action:book_appointment / action:submit_referral / action:share_feedback / service:<slug>).
+- ModeToggle with route-synced active state; auto-resets mode when URL changes.
+- Suggestion chips regenerated per assistant reply, default 4 chips.
+- Dark-themed inline forms (Appointment, Referral, Feedback) inside the dynamic view.
+- Conversation rehydration on reload via GET history endpoint; last assistant intent re-dispatched so the left panel matches where the user left off.
+
+## Testing status
+- Backend: 19/19 pytest passing (includes 4 AI assistant tests: single-turn, multi-turn context, invalid-intent sanitization, empty-history).
+- Frontend: All critical flows verified by testing agent (iter 5): mode toggle, chat send (direct click + Enter), intent→view transition, appointment/referral/feedback form submit, chat rehydration on reload, static-page regression.
 
 ## Prioritized Backlog
-- **P1**: Add dedicated Service Areas page with map/zip code list; wire "View areas" card correctly.
-- **P1**: Admin dashboard (protected) to view contacts/referrals/surveys — currently GET endpoints expose PII publicly.
-- **P2**: SendGrid/Resend integration to email submissions to agency inbox.
-- **P2**: Appointment scheduling calendar (time-slot picker).
-- **P2**: Testimonials / case study section on Home.
-- **P3**: Blog/resources library (articles, PDFs).
-- **P3**: Multilingual support (Spanish).
+- **P1**: Dedicated Service Areas page with ZIP list or map (currently handled via contact info card).
+- **P1**: Admin auth + protected routes for GET /api/contacts, /api/referrals (currently public — PHI-adjacent risk before production).
+- **P1**: Email notifications (SendGrid/Resend) on form submission + new chat sessions for instant lead response.
+- **P2**: Deduplicate the mobile+desktop ChatPanel instances into a single responsive component (minor, wasteful double history fetch).
+- **P2**: Rate limiting + session ownership on /api/assistant/history.
+- **P2**: Stream LLM responses for lower perceived latency.
+- **P3**: Multilingual support (Spanish), testimonials, blog library.
 
 ## Next Actions
-- Get confirmation from user, then (optionally) add admin auth + email notifications.
+- Confirm the dual-mode UX with the user.
+- Decide on P1 items: admin auth + email notifications.
