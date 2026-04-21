@@ -84,17 +84,17 @@ const ChatPanel = forwardRef(function ChatPanel({ onIntent }, ref) {
   return (
     <div
       className="h-full w-full flex flex-col"
-      style={{ background: "linear-gradient(180deg, rgba(10,14,30,0.96) 0%, rgba(8,12,26,0.98) 100%)" }}
+      style={{ background: "linear-gradient(180deg, rgba(10,20,16,0.96) 0%, rgba(8,16,12,0.98) 100%)" }}
       data-testid="chat-panel"
     >
       <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #E07A5F, #C17767)" }}>
+          <div className="h-9 w-9 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #D4A537, #C9A227)" }}>
             <Sparkles className="h-4 w-4 text-white" strokeWidth={1.5} />
           </div>
           <div>
-            <div className="font-display text-lg text-[#F3EFE6] leading-none">CarePlus AI</div>
-            <div className="text-[10px] tracking-[0.18em] uppercase text-[#B7B3AA] mt-1">always on · claude sonnet 4.5</div>
+            <div className="font-display text-lg text-[#EAE5D9] leading-none">CarePlus AI</div>
+            <div className="text-[10px] tracking-[0.18em] uppercase text-[#B5AD99] mt-1">always on · claude sonnet 4.5</div>
           </div>
         </div>
       </div>
@@ -102,8 +102,8 @@ const ChatPanel = forwardRef(function ChatPanel({ onIntent }, ref) {
       <div ref={listRef} className="flex-1 overflow-y-auto px-5 py-6 space-y-4" data-testid="chat-messages">
         {messages.length === 0 && (
           <div className="text-center py-8">
-            <div className="font-display text-2xl text-[#F3EFE6]">How can I help?</div>
-            <p className="text-sm text-[#B7B3AA] mt-2">Ask about services, book an appointment, or submit a referral.</p>
+            <div className="font-display text-2xl text-[#EAE5D9]">How can I help?</div>
+            <p className="text-sm text-[#B5AD99] mt-2">Ask about services, book an appointment, or submit a referral.</p>
           </div>
         )}
 
@@ -121,11 +121,11 @@ const ChatPanel = forwardRef(function ChatPanel({ onIntent }, ref) {
                 className={`rounded-2xl px-4 py-3 max-w-[88%] text-[15px] leading-relaxed ${
                   m.role === "user"
                     ? "text-white"
-                    : "text-[#F3EFE6] border border-white/10"
+                    : "text-[#EAE5D9] border border-white/10"
                 }`}
                 style={
                   m.role === "user"
-                    ? { background: "linear-gradient(135deg, #C17767, #A35F52)" }
+                    ? { background: "linear-gradient(135deg, #C9A227, #8F6E23)" }
                     : { background: "rgba(255,255,255,0.04)" }
                 }
               >
@@ -137,7 +137,7 @@ const ChatPanel = forwardRef(function ChatPanel({ onIntent }, ref) {
 
         {busy && (
           <div className="flex justify-start" data-testid="chat-loader">
-            <div className="rounded-2xl px-4 py-3 border border-white/10 bg-white/[0.04] text-[#B7B3AA] flex items-center gap-2">
+            <div className="rounded-2xl px-4 py-3 border border-white/10 bg-white/[0.04] text-[#B5AD99] flex items-center gap-2">
               <Loader2 className="h-4 w-4 animate-spin" /> Thinking...
             </div>
           </div>
@@ -150,7 +150,7 @@ const ChatPanel = forwardRef(function ChatPanel({ onIntent }, ref) {
             key={s}
             onClick={() => send(s)}
             disabled={busy}
-            className="text-xs rounded-full border border-white/10 px-3 py-1.5 text-[#D6D2C9] hover:border-white/30 hover:bg-white/[0.05] transition-all disabled:opacity-40"
+            className="text-xs rounded-full border border-white/10 px-3 py-1.5 text-[#D4CDB6] hover:border-white/30 hover:bg-white/[0.05] transition-all disabled:opacity-40"
             data-testid={`chip-${s.toLowerCase().replace(/\s+/g, "-")}`}
           >
             {s}
@@ -167,7 +167,7 @@ const ChatPanel = forwardRef(function ChatPanel({ onIntent }, ref) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask about care services..."
-          className="flex-1 min-w-0 bg-white/[0.04] border border-white/10 rounded-full px-5 py-3 text-[#F3EFE6] placeholder:text-white/30 outline-none focus:border-[#E07A5F]"
+          className="flex-1 min-w-0 bg-white/[0.04] border border-white/10 rounded-full px-5 py-3 text-[#EAE5D9] placeholder:text-white/30 outline-none focus:border-[#D4A537]"
           data-testid="chat-input"
           disabled={busy}
         />
@@ -175,7 +175,7 @@ const ChatPanel = forwardRef(function ChatPanel({ onIntent }, ref) {
           type="submit"
           disabled={busy || !input.trim()}
           className="shrink-0 h-11 w-11 rounded-full flex items-center justify-center text-white disabled:opacity-40"
-          style={{ background: "linear-gradient(135deg, #E07A5F, #C17767)" }}
+          style={{ background: "linear-gradient(135deg, #D4A537, #C9A227)" }}
           data-testid="chat-send-btn"
           aria-label="Send"
         >

@@ -15,20 +15,20 @@ export default function AIExperience() {
   return (
     <div
       className="fixed inset-0 flex flex-col"
-      style={{ background: "#070B1F", color: "#F3EFE6" }}
+      style={{ background: "#0A1410", color: "#EAE5D9" }}
       data-testid="ai-experience"
     >
       {/* Top bar */}
       <div className="relative flex items-center justify-between px-6 lg:px-10 h-20 border-b border-white/5"
-        style={{ background: "rgba(7,11,31,0.85)", backdropFilter: "blur(18px)" }}>
+        style={{ background: "rgba(10,20,16,0.85)", backdropFilter: "blur(18px)" }}>
         <Link to="/" className="flex items-center gap-3" data-testid="ai-logo-link">
           <span className="h-10 w-10 rounded-full flex items-center justify-center text-white font-display text-xl"
-            style={{ background: "linear-gradient(135deg, #E07A5F, #4A6741)" }}>
+            style={{ background: "linear-gradient(135deg, #D4A537, #2D4A2B)" }}>
             c+
           </span>
-          <span className="font-display text-xl text-[#F3EFE6]">Careplus Health Services</span>
+          <span className="font-display text-xl text-[#EAE5D9]">Careplus Health Services</span>
         </Link>
-        <a href={BRAND.phoneHref} className="hidden md:inline-flex text-sm text-[#C8C4BB] hover:text-white transition-colors" data-testid="ai-phone-link">
+        <a href={BRAND.phoneHref} className="hidden md:inline-flex text-sm text-[#C5BFA8] hover:text-white transition-colors" data-testid="ai-phone-link">
           {BRAND.phone}
         </a>
       </div>

@@ -5,15 +5,17 @@
 @tailwind utilities;
 
 :root {
-    --bg-base: 43 43% 98%;       /* #FDFBF7 */
-    --bg-secondary: 42 31% 93%;  /* #F3EFE6 */
+    --bg-base: 42 29% 93%;        /* #F4F1EA parchment */
+    --bg-secondary: 42 28% 88%;   /* #EAE5D9 warm cream */
     --surface: 0 0% 100%;
-    --brand: 105 22% 33%;        /* #4A6741 sage */
-    --brand-hover: 105 22% 27%;
-    --accent: 11 42% 58%;        /* #C17767 terracotta */
-    --text-primary: 135 4% 18%;  /* #2D312E */
-    --text-secondary: 105 5% 38%;/* #5C635A */
-    --soft-border: 42 25% 87%;   /* #E5E1D8 */
+    --brand: 118 25% 23%;         /* #2D4A2B deep forest */
+    --brand-hover: 119 25% 17%;   /* #1F3520 */
+    --accent: 45 69% 47%;         /* #C9A227 mustard */
+    --accent-hover: 44 65% 40%;
+    --moss: 88 29% 43%;           /* #6B8E4E moss */
+    --text-primary: 120 8% 11%;   /* #1A1F1B */
+    --text-secondary: 120 6% 31%; /* #4A554C */
+    --soft-border: 40 25% 80%;    /* #D9D3C3 */
 }
 
 @layer base {
@@ -25,13 +27,13 @@
         --popover: var(--surface);
         --popover-foreground: var(--text-primary);
         --primary: var(--brand);
-        --primary-foreground: 43 43% 98%;
+        --primary-foreground: 42 29% 93%;
         --secondary: var(--bg-secondary);
         --secondary-foreground: var(--text-primary);
         --muted: var(--bg-secondary);
         --muted-foreground: var(--text-secondary);
         --accent: var(--accent);
-        --accent-foreground: 43 43% 98%;
+        --accent-foreground: 42 29% 93%;
         --destructive: 0 72% 51%;
         --destructive-foreground: 0 0% 98%;
         --border: var(--soft-border);
@@ -86,15 +88,16 @@
     .btn-primary:hover {
         background: hsl(var(--brand-hover));
         transform: translateY(-2px);
-        box-shadow: 0 14px 30px -12px rgba(74, 103, 65, 0.45);
+        box-shadow: 0 14px 30px -12px rgba(45, 74, 43, 0.45);
     }
     .btn-accent {
-        @apply inline-flex items-center justify-center gap-2 rounded-full px-8 py-4 text-white font-medium transition-all duration-300;
+        @apply inline-flex items-center justify-center gap-2 rounded-full px-8 py-4 font-medium transition-all duration-300;
         background: hsl(var(--accent));
+        color: #1A1F1B;
     }
     .btn-accent:hover {
         transform: translateY(-2px);
-        box-shadow: 0 14px 30px -12px rgba(193, 119, 103, 0.55);
+        box-shadow: 0 14px 30px -12px rgba(201, 162, 39, 0.55);
         filter: brightness(1.03);
     }
     .btn-ghost {
@@ -108,10 +111,10 @@
         transform: translateY(-1px);
     }
     .glass-nav {
-        background: hsla(43, 43%, 98%, 0.72);
+        background: hsla(42, 29%, 93%, 0.72);
         backdrop-filter: saturate(160%) blur(18px);
         -webkit-backdrop-filter: saturate(160%) blur(18px);
-        border-bottom: 1px solid hsla(42, 25%, 87%, 0.6);
+        border-bottom: 1px solid hsla(40, 25%, 80%, 0.6);
     }
     .soft-card {
         background: hsl(var(--surface));
@@ -121,7 +124,7 @@
     }
     .soft-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 24px 48px -28px rgba(45, 49, 46, 0.25);
+        box-shadow: 0 24px 48px -28px rgba(26, 31, 27, 0.25);
         border-color: hsl(var(--brand) / 0.35);
     }
     .grain::before {

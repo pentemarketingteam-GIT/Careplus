@@ -20,11 +20,11 @@ export default function ModeToggle() {
       className="fixed left-1/2 -translate-x-1/2 z-[60] rounded-full p-1 flex items-center gap-1 border transition-all duration-300"
       style={{
         top: topOffset,
-        background: mode === "dynamic" ? "rgba(15,20,40,0.7)" : "rgba(255,255,255,0.85)",
+        background: mode === "dynamic" ? "rgba(10,20,16,0.7)" : "rgba(255,255,255,0.85)",
         borderColor: mode === "dynamic" ? "rgba(255,255,255,0.1)" : "hsl(var(--soft-border))",
         backdropFilter: "blur(18px)",
         WebkitBackdropFilter: "blur(18px)",
-        boxShadow: mode === "dynamic" ? "0 10px 30px -15px rgba(0,0,0,0.8)" : "0 10px 30px -18px rgba(45,49,46,0.25)",
+        boxShadow: mode === "dynamic" ? "0 10px 30px -15px rgba(0,0,0,0.8)" : "0 10px 30px -18px rgba(26,31,27,0.25)",
       }}
       data-testid="mode-toggle"
     >
@@ -45,8 +45,8 @@ function ToggleBtn({ active, onClick, children, testid, darkBg }) {
       data-testid={testid}
       className="rounded-full px-4 py-2 text-[11px] tracking-[0.18em] font-semibold transition-all duration-300"
       style={{
-        background: active ? (darkBg ? "#0B1028" : "#1a1d1f") : "transparent",
-        color: active ? "#F3EFE6" : darkBg ? "rgba(255,255,255,0.6)" : "#2D312E",
+        background: active ? (darkBg ? "#0D1812" : "#1A1F1B") : "transparent",
+        color: active ? "#EAE5D9" : darkBg ? "rgba(255,255,255,0.6)" : "#1A1F1B",
         letterSpacing: "0.18em",
       }}
     >

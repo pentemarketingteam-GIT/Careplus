@@ -14,9 +14,9 @@ export default function Home() {
       {/* HERO */}
       <section className="relative overflow-hidden" data-testid="hero-section">
         <div className="absolute -top-32 -right-32 w-[480px] h-[480px] rounded-full blur-3xl opacity-40"
-          style={{ background: "radial-gradient(circle, #C17767 0%, transparent 70%)" }} />
+          style={{ background: "radial-gradient(circle, #C9A227 0%, transparent 70%)" }} />
         <div className="absolute -bottom-24 -left-24 w-[420px] h-[420px] rounded-full blur-3xl opacity-30"
-          style={{ background: "radial-gradient(circle, #4A6741 0%, transparent 70%)" }} />
+          style={{ background: "radial-gradient(circle, #2D4A2B 0%, transparent 70%)" }} />
 
         <div className="relative mx-auto max-w-7xl px-6 lg:px-10 pt-20 pb-28 grid lg:grid-cols-12 gap-12 items-center">
           <motion.div
@@ -63,7 +63,7 @@ export default function Home() {
                 alt="Compassionate home care"
                 className="w-full h-[520px] object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#2D312E]/35 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#1A1F1B]/35 via-transparent to-transparent" />
               <div className="absolute bottom-6 left-6 right-6 backdrop-blur-md bg-white/75 rounded-2xl p-5 border border-white/60">
                 <div className="flex items-center gap-3">
                   <Sparkles className="h-5 w-5 text-[hsl(var(--accent))]" strokeWidth={1.5} />
@@ -224,14 +224,14 @@ export default function Home() {
       {/* CTA STRIP */}
       <section className="mx-auto max-w-7xl px-6 lg:px-10 mt-28" data-testid="cta-strip">
         <div className="relative overflow-hidden rounded-[2rem] p-10 md:p-16 grain"
-          style={{ background: "linear-gradient(135deg, #4A6741 0%, #3D5636 100%)" }}>
+          style={{ background: "linear-gradient(135deg, #2D4A2B 0%, #1F3520 100%)" }}>
           <div className="relative z-10 grid md:grid-cols-2 gap-8 items-center">
             <div>
-              <div className="label-xs !text-[#E8D9C6]">Ready when you are</div>
+              <div className="label-xs !text-[#D4B85A]">Ready when you are</div>
               <h3 className="font-display text-4xl md:text-5xl text-white mt-4 leading-tight">
                 Let's plan care that truly <span className="serif-italic">fits</span>.
               </h3>
-              <p className="mt-5 text-[#E8E4DB] max-w-xl">
+              <p className="mt-5 text-[#D4CDB6] max-w-xl">
                 Whether it's post-surgery recovery, daily living support, or skilled nursing — we'll build a plan together.
               </p>
             </div>

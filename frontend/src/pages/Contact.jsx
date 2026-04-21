@@ -49,7 +49,7 @@ export default function Contact() {
           </div>
 
           <div className="mt-6 soft-card p-7" style={{ background: "hsl(var(--brand))" }}>
-            <div className="label-xs !text-[#E8D9C6]">Urgent?</div>
+            <div className="label-xs !text-[#D4B85A]">Urgent?</div>
             <div className="font-display text-2xl text-white mt-2">Call us right now.</div>
             <a href={BRAND.phoneHref} className="btn-accent mt-5 w-full" data-testid="urgent-call-btn">
               <Phone className="h-4 w-4" strokeWidth={1.5} /> {BRAND.phone}
