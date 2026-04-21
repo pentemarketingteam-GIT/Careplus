@@ -1,0 +1,44 @@
+{
+  "summary": "Tested Careplus marketing site — 6 backend endpoints (15 pytest tests, 100% pass) and end-to-end frontend flows (24/25 pass). One real integration bug found: Survey form submission fails with 422 when optional email is left blank.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/survey", "issue": "EmailStr field rejects empty string with 422. Frontend sends email:'' which fails validation. Either backend should accept '' as None for optional EmailStr fields, or frontend must omit empty optional email keys before POST."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Resources page → Survey submission",
+        "issue": "POST /api/survey returns 422 'value is not a valid email address' when user does not enter an email (email='' is sent). Toast 'Something went wrong' shown. ReferralForm correctly deletes empty referrer_email, but Resources.jsx submit() does not strip empty optional fields.",
+        "affected_selectors": ["[data-testid=survey-submit-btn]", "[data-testid=survey-email]"]
+      }
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Fix Survey form (Resources.jsx submit): strip empty optional fields before POST, e.g., `const payload = { ...form, rating: Number(form.rating) }; if (!payload.email) delete payload.email; if (!payload.name) delete payload.name;` — mirrors the existing pattern used in ReferralForm.",
+    "Optional hardening: in backend, convert '' to None for Optional[EmailStr] across SurveyCreate/ReferralCreate/AppointmentCreate/ContactCreate (use a validator) so future frontends don't hit the same trap."
+  ],
+  "critical_code_review_comments": [
+    "Resources.jsx: survey submit always sends email even if blank — blocks submission. Same defensive cleanup as ReferralForm should be applied.",
+    "server.py uses @app.on_event('shutdown') (deprecated in FastAPI; consider lifespan handler). Not blocking.",
+    "Backend POST endpoints return 200 instead of 201 for resource creation — minor REST semantics issue, not blocking.",
+    "Home.jsx 'Service Areas' QuickCard links to /contact but eyebrow promises 'View areas' — misleading; could route to dedicated section or About.",
+    "GET /api/contact and /api/referrals expose all submissions publicly without auth — acceptable for marketing MVP but should be flagged: any visitor can list PII."
+  ],
+  "updated_files": [
+    "/app/backend/tests/backend_test.py (created)"
+  ],
+  "success_rate": {"backend": "100% (15/15)", "frontend": "96% (24/25)"},
+  "seed_data_creation": "Created TEST_-prefixed records via backend tests and frontend submission flows in contacts, referrals, surveys, appointments collections.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Backend pytest suite at /app/backend/tests/backend_test.py covers all endpoints (health, services, contact, referrals, survey, appointments) with create→GET persistence and validation checks. Survey 422 bug is reproducible via: curl -X POST $API/survey -d '{\"rating\":4,\"feedback\":\"x\",\"email\":\"\"}'. After main agent fix, re-run pytest and re-test the Resources page survey submission with empty email field.",
+  "rca of the issue": "Pydantic v2 EmailStr does not coerce empty string to None for Optional[EmailStr] fields — it triggers 422. Resources.jsx Survey form initialState has email:'' and the submit handler posts the form unmodified (unlike ReferralForm which strips empty referrer_email). Fix: replicate the strip pattern in Resources.jsx submit() or add a Pydantic field validator on the backend that converts empty strings to None."
+}
