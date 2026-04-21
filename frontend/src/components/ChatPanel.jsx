@@ -160,7 +160,7 @@ const ChatPanel = forwardRef(function ChatPanel({ onIntent }, ref) {
 
       <form
         onSubmit={(e) => { e.preventDefault(); send(); }}
-        className="p-4 pr-28 md:pr-32 border-t border-white/10 flex items-center gap-2"
+        className="p-4 pr-4 pb-16 md:pb-4 md:pr-48 border-t border-white/10 flex items-center gap-2"
         data-testid="chat-form"
       >
         <input
