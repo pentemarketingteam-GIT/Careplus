@@ -1,0 +1,50 @@
+{
+  "summary": "Iter 7 e2e testing PASSED. Backend: 42/42 pytest tests passing (26 regression + 16 new for auth + intake + extraction). All 3 auth endpoints validate correctly: POST /api/auth/session returns 400 on empty session_id, 422 on missing field, and 401/502 on bogus id; GET /api/auth/me returns 401 for guests and the seeded user for both Bearer token and cookie; POST /api/auth/logout deletes the session doc. All 3 intake endpoints work: GET /api/intake/{sid} returns {session_id, fields:{}} for unknown session; PATCH merges fields with deep-dotted $set and whitelists INTAKE_FIELDS; POST /submit requires name+phone, writes appointments row with source='ai_intake', returns logged_in:false for guest and logged_in:true with user_id when Bearer token is present. Assistant extraction: 'Hi my name is Jane Smith, my mom needs help after hip surgery' produced extracted.name='Jane Smith' plus condition/caregiver fields and persisted to db.intakes so subsequent GET /api/intake/{sid} reflected them. Frontend: Header shows 'Sign in' (data-testid='auth-login-btn') on Home and /ai; Home testimonials render (4 cards). /ai welcome chip 'Start my intake' transitions to IntakeView with all 10 labeled fields + progress bar + guest banner containing [data-testid=intake-signin-btn] which triggers navigation on click. Sending 'My name is Jane Smith and I have hip pain' via chat-input auto-populated intake-input-name='Jane Smith' and intake-input-condition='hip pain' within ~15s (progress jumped to 20%). Manually filling phone+service revealed 'Submit & request appointment' button; clicking it produced <canvas> (confetti) + toast. AuthCallback route: navigating to /profile#session_id=fake-session-id-12345 was detected synchronously by AppRouter, POST to /api/auth/session fired (got 401 from OAuth provider for bogus id), and cleanly redirected to /ai — hash-based routing works.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "/ai IntakeView (book/intake) — carryover",
+        "issues": [
+          "Preferred-contact-time field in IntakeWizard is a plain text <input> rather than a time/date picker or the shadcn Calendar used elsewhere. It will accept any string (my test inadvertently typed 'Hip pain' into it). Consider semantic type='time' or a Calendar component.",
+          "Carryover from iter 6: dyn-appointment-form still uses browser's native date picker instead of shadcn Calendar."
+        ]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/backend/tests/test_auth_intake.py",
+    "/app/test_reports/pytest/pytest_results.xml",
+    "/app/test_reports/pytest/pytest_iter7.xml"
+  ],
+  "action_items": [
+    "(Optional/minor) Backend test for /api/auth/session test_invalid_session_id_returns_401 currently accepts 401 OR 502 because Emergent OAuth provider may be unreachable from test env. If provider becomes stable, tighten to 401-only.",
+    "(Optional/minor) Preferred-contact-time field in IntakeWizard accepts free-form strings — consider input[type=time] or shadcn Calendar.",
+    "(Carryover) dyn-appointment-form native date picker vs shadcn Calendar for brand consistency."
+  ],
+  "critical_code_review_comments": [
+    "server.py has grown to 629 lines — nearing the 700-line threshold. Recommend splitting into modules: auth.py (User model + /auth routes + get_current_user), intake.py (Intake routes + INTAKE_FIELDS), assistant.py (SYSTEM_PROMPT + /assistant routes), models.py (Contact/Referral/Survey/Appointment), main.py (FastAPI app + router wiring). Not blocking.",
+    "get_current_user correctly handles both httpOnly cookie AND Authorization: Bearer header, excludes _id via projection, parses ISO string expires_at with tz-safe comparison — clean and testable.",
+    "submit_intake persists user_id only when session is valid (guest-first design), and appointment.source='ai_intake' makes downstream filtering trivial. Good.",
+    "PATCH /intake/{sid} whitelists INTAKE_FIELDS before $set, preventing arbitrary field injection — security-correct.",
+    "assistant_chat auto-merges extracted fields into db.intakes via deep-dotted $set keyed by session_id, so the same chat sessionId is reusable as the intake sessionId in the frontend. Elegant contract.",
+    "Frontend chat-input data-testid present (confirmed via DOM scan). IntakeWizard exposes intake-signin-btn, intake-input-name, intake-input-condition — all data-testid-compliant.",
+    "Previously-reported 2x ChatPanel mount (desktop + mobile stacked) is unchanged; still causes 2x GET /assistant/history on mount. Low-priority.",
+    "401s from /api/auth/me on guest page load are expected (AuthProvider fires /me on mount). They appear as red console noise; consider swallowing 401 as a non-error state in the Axios/fetch interceptor."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_auth_intake.py (NEW — 16 tests covering auth + intake + extraction)",
+    "/app/backend/tests/backend_test.py (added 'action:start_intake' to VALID_INTENTS to reflect new intent)",
+    "/app/memory/test_credentials.md (seeded frontend test user token for future agents)"
+  ],
+  "success_rate": { "backend": "100% (42/42)", "frontend": "100% on all iter-7 features tested" },
+  "test_credentials": "Seeded user in test_database: email=test.frontend.1776794739075@example.com, session_token=TEST_session_frontend_1776794739075 (valid 7 days). Cleanup command in /app/memory/test_credentials.md.",
+  "seed_data_creation": "Created 1 user + 1 user_session via mongosh for frontend auth testing. pytest fixture seeded_user creates additional TEST_user_* + TEST_session_* docs per test; all cleaned up in fixture teardown and session-scope mongo fixture deletes TEST_-prefixed leftovers across users/user_sessions/intakes/appointments collections.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iter 7 (optional Emergent Google Auth + AI intake flow) fully verified. Auth endpoints validated with seeded user (see /app/memory/test_credentials.md). Intake 3 endpoints + LLM extraction auto-fill confirmed. Frontend: AuthButton data-testid=auth-login-btn / auth-user-btn, IntakeWizard data-testid=intake-signin-btn + intake-input-<field>, ChatPanel data-testid=chat-input. Guest mode is the default (no login required). To re-seed for auth tests: mongosh playbook at /app/auth_testing.md. All 42 pytest tests green, run time ~36s.",
+  "rca of the issue": "N/A — no functional bugs found. Only design/cleanup suggestions (large server.py, native input for preferred_contact_time, 401 console noise on guest /me)."
+}

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, Cookie
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -8,12 +8,13 @@ import re
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 from emergentintegrations.llm.openai import OpenAITextToSpeech
 import base64
+import httpx
 
 
 ROOT_DIR = Path(__file__).parent
@@ -187,9 +188,16 @@ VALID_INTENTS = {
     "welcome", "page:about", "page:contact", "page:careers", "page:services",
     "action:book_appointment", "action:submit_referral", "action:share_feedback",
     "action:find_care", "action:meet_team", "action:tour_visit", "action:symptom_check",
+    "action:start_intake",
     "service:skilled-nursing", "service:physical-therapy", "service:occupational-therapy",
     "service:speech-therapy", "service:home-health-aide", "service:medical-social-work",
 }
+
+INTAKE_FIELDS = [
+    "name", "phone", "email", "condition",
+    "insurance_provider", "insurance_id",
+    "preferred_contact_time", "service", "urgency", "caregiver_relationship",
+]
 
 SYSTEM_PROMPT = """You are CarePlus AI, a warm, knowledgeable assistant for Careplus Health Services, Inc. — a Dallas-based home healthcare agency offering physician-directed care at home.
 
@@ -218,12 +226,27 @@ Intent selection:
 - If user asks what a visit looks like / day in the life / process → action:tour_visit
 - If user mentions pain, symptoms, body area, or "what care do I need" → action:symptom_check
 - If user wants guided help choosing care → action:find_care
+- If user wants to start intake / onboarding / get registered / new patient setup / pre-fill appointment → action:start_intake
 - If user wants to call/email/reach you → page:contact
 - If user mentions jobs/careers/hiring → page:careers
 - If user wants to schedule/book/set appointment → action:book_appointment
 - If user wants to refer a patient → action:submit_referral
 - If user wants to leave feedback/review → action:share_feedback
 - Otherwise general → welcome (or null if unrelated)
+
+INTAKE EXTRACTION (always run):
+Scan EVERY user message for patient-intake data. Extract any of these fields that appear:
+  name, phone, email, condition, insurance_provider, insurance_id,
+  preferred_contact_time, service (one of: skilled-nursing, physical-therapy, occupational-therapy, speech-therapy, home-health-aide, medical-social-work),
+  urgency (routine | soon | urgent), caregiver_relationship (self | spouse | child | parent | sibling | other)
+Only include fields you are CONFIDENT about from the current message. Omit fields not mentioned.
+
+Add this to your JSON response:
+  "extracted": { "<field>": "<value>", ... }   // omit the key if nothing to extract
+
+When intent is action:start_intake OR the conversation is clearly in intake mode, ask ONE focused question at a time for the next missing field in this order:
+name → phone → email → caregiver_relationship → condition → service → urgency → preferred_contact_time → insurance_provider → insurance_id
+When all required fields (name, phone, condition, service) are present, confirm and suggest booking.
 
 Always offer 2–4 helpful suggestion chips that move the conversation forward.
 Never fabricate medical advice. If asked medical questions, gently redirect them to talk to a clinician and offer to book an appointment.
@@ -240,6 +263,7 @@ class AssistantReply(BaseModel):
     reply: str
     intent: Optional[str] = None
     suggestions: List[str] = []
+    extracted: Dict[str, Any] = Field(default_factory=dict)
 
 
 class ChatRecord(BaseModel):
@@ -326,6 +350,12 @@ async def assistant_chat(payload: AssistantMessage):
         suggestions = []
     suggestions = [str(s)[:40] for s in suggestions][:4]
 
+    extracted = parsed.get("extracted") or {}
+    if not isinstance(extracted, dict):
+        extracted = {}
+    # keep only whitelisted fields
+    extracted = {k: v for k, v in extracted.items() if k in INTAKE_FIELDS and v not in (None, "")}
+
     if not reply_text:
         reply_text = "I'm here to help with Careplus home healthcare. Could you tell me a bit more about what you're looking for?"
 
@@ -335,7 +365,21 @@ async def assistant_chat(payload: AssistantMessage):
     adoc["created_at"] = adoc["created_at"].isoformat()
     await db.chat_messages.insert_one(adoc)
 
-    return AssistantReply(session_id=session_id, reply=reply_text, intent=intent, suggestions=suggestions)
+    # Persist/merge extracted intake data keyed by chat session
+    if extracted:
+        await db.intakes.update_one(
+            {"session_id": session_id},
+            {
+                "$set": {**{f"fields.{k}": v for k, v in extracted.items()},
+                         "updated_at": datetime.now(timezone.utc).isoformat()},
+                "$setOnInsert": {"session_id": session_id,
+                                 "created_at": datetime.now(timezone.utc).isoformat()},
+            },
+            upsert=True,
+        )
+
+    return AssistantReply(session_id=session_id, reply=reply_text, intent=intent,
+                          suggestions=suggestions, extracted=extracted)
 
 
 @api_router.get("/assistant/history/{session_id}")
@@ -361,7 +405,7 @@ async def assistant_tts(payload: TTSRequest):
     text = (payload.text or "").strip()
     if not text:
         raise HTTPException(status_code=400, detail="text is required")
-    text = text[:2000]  # keep TTS costs sane
+    text = text[:2000]
     try:
         tts = OpenAITextToSpeech(api_key=api_key)
         audio_bytes = await tts.generate_speech(text=text, model="tts-1", voice="coral")
@@ -370,6 +414,199 @@ async def assistant_tts(payload: TTSRequest):
     except Exception as e:
         logger.exception("TTS failed")
         raise HTTPException(status_code=502, detail=f"TTS unavailable: {e}")
+
+
+# ---------- AUTH (Emergent Google Auth) ----------
+# REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
+
+class User(BaseModel):
+    user_id: str
+    email: str
+    name: str
+    picture: Optional[str] = None
+
+
+async def get_current_user(
+    request: Request,
+    session_token: Optional[str] = Cookie(default=None),
+) -> Optional[User]:
+    """Resolve current user from session_token cookie or Authorization header. Returns None if guest."""
+    token = session_token
+    if not token:
+        auth = request.headers.get("Authorization") or ""
+        if auth.lower().startswith("bearer "):
+            token = auth[7:].strip()
+    if not token:
+        return None
+    sess = await db.user_sessions.find_one({"session_token": token}, {"_id": 0})
+    if not sess:
+        return None
+    expires_at = sess.get("expires_at")
+    if isinstance(expires_at, str):
+        expires_at = datetime.fromisoformat(expires_at)
+    if expires_at and expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+    if expires_at and expires_at < datetime.now(timezone.utc):
+        return None
+    user_doc = await db.users.find_one({"user_id": sess["user_id"]}, {"_id": 0})
+    if not user_doc:
+        return None
+    return User(**user_doc)
+
+
+class SessionExchange(BaseModel):
+    session_id: str
+
+
+@api_router.post("/auth/session")
+async def auth_session(payload: SessionExchange, response: Response):
+    """Exchange temporary session_id (from Emergent OAuth URL fragment) for a persistent session_token."""
+    sid = (payload.session_id or "").strip()
+    if not sid:
+        raise HTTPException(status_code=400, detail="session_id required")
+
+    async with httpx.AsyncClient(timeout=15) as client:
+        try:
+            r = await client.get(
+                "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
+                headers={"X-Session-ID": sid},
+            )
+        except Exception as e:
+            raise HTTPException(status_code=502, detail=f"OAuth provider unreachable: {e}")
+    if r.status_code != 200:
+        raise HTTPException(status_code=401, detail="Invalid session_id")
+    data = r.json()
+
+    email = data.get("email")
+    name = data.get("name") or email
+    picture = data.get("picture")
+    session_token = data.get("session_token")
+    if not email or not session_token:
+        raise HTTPException(status_code=502, detail="OAuth response missing fields")
+
+    # Upsert user
+    existing = await db.users.find_one({"email": email}, {"_id": 0})
+    if existing:
+        user_id = existing["user_id"]
+        await db.users.update_one(
+            {"user_id": user_id},
+            {"$set": {"name": name, "picture": picture, "last_login": datetime.now(timezone.utc).isoformat()}},
+        )
+    else:
+        user_id = f"user_{uuid.uuid4().hex[:12]}"
+        await db.users.insert_one({
+            "user_id": user_id,
+            "email": email,
+            "name": name,
+            "picture": picture,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "last_login": datetime.now(timezone.utc).isoformat(),
+        })
+
+    expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+    await db.user_sessions.insert_one({
+        "user_id": user_id,
+        "session_token": session_token,
+        "expires_at": expires_at.isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    })
+
+    response.set_cookie(
+        key="session_token",
+        value=session_token,
+        httponly=True,
+        secure=True,
+        samesite="none",
+        path="/",
+        max_age=7 * 24 * 3600,
+    )
+    return {"user_id": user_id, "email": email, "name": name, "picture": picture}
+
+
+@api_router.get("/auth/me")
+async def auth_me(request: Request, session_token: Optional[str] = Cookie(default=None)):
+    user = await get_current_user(request, session_token)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    return user.model_dump()
+
+
+@api_router.post("/auth/logout")
+async def auth_logout(response: Response, session_token: Optional[str] = Cookie(default=None)):
+    if session_token:
+        await db.user_sessions.delete_one({"session_token": session_token})
+    response.delete_cookie(key="session_token", path="/", samesite="none", secure=True)
+    return {"ok": True}
+
+
+# ---------- INTAKE ----------
+@api_router.get("/intake/{session_id}")
+async def get_intake(session_id: str):
+    doc = await db.intakes.find_one({"session_id": session_id}, {"_id": 0})
+    if not doc:
+        return {"session_id": session_id, "fields": {}}
+    return doc
+
+
+class IntakePatch(BaseModel):
+    fields: Dict[str, Any]
+
+
+@api_router.patch("/intake/{session_id}")
+async def patch_intake(session_id: str, payload: IntakePatch):
+    updates = {f"fields.{k}": v for k, v in payload.fields.items() if k in INTAKE_FIELDS}
+    if not updates:
+        return {"session_id": session_id, "fields": {}}
+    await db.intakes.update_one(
+        {"session_id": session_id},
+        {"$set": {**updates, "updated_at": datetime.now(timezone.utc).isoformat()},
+         "$setOnInsert": {"session_id": session_id,
+                          "created_at": datetime.now(timezone.utc).isoformat()}},
+        upsert=True,
+    )
+    doc = await db.intakes.find_one({"session_id": session_id}, {"_id": 0})
+    return doc
+
+
+@api_router.post("/intake/{session_id}/submit")
+async def submit_intake(
+    session_id: str,
+    request: Request,
+    session_token: Optional[str] = Cookie(default=None),
+):
+    user = await get_current_user(request, session_token)
+    doc = await db.intakes.find_one({"session_id": session_id}, {"_id": 0})
+    if not doc or not doc.get("fields"):
+        raise HTTPException(status_code=400, detail="No intake data to submit")
+    fields = doc["fields"]
+    if not fields.get("name") or not fields.get("phone"):
+        raise HTTPException(status_code=400, detail="Name and phone are required")
+
+    appt = {
+        "id": str(uuid.uuid4()),
+        "name": fields.get("name"),
+        "phone": fields.get("phone"),
+        "email": fields.get("email"),
+        "preferred_date": fields.get("preferred_contact_time"),
+        "service": fields.get("service"),
+        "notes": (
+            f"Condition: {fields.get('condition','')}\n"
+            f"Insurance: {fields.get('insurance_provider','')} / {fields.get('insurance_id','')}\n"
+            f"Urgency: {fields.get('urgency','')}\n"
+            f"Caregiver: {fields.get('caregiver_relationship','')}"
+        ),
+        "user_id": user.user_id if user else None,
+        "source": "ai_intake",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.appointments.insert_one(appt)
+    await db.intakes.update_one(
+        {"session_id": session_id},
+        {"$set": {"status": "submitted", "appointment_id": appt["id"],
+                  "user_id": user.user_id if user else None,
+                  "submitted_at": datetime.now(timezone.utc).isoformat()}},
+    )
+    return {"ok": True, "appointment_id": appt["id"], "logged_in": bool(user)}
 
 
 app.include_router(api_router)

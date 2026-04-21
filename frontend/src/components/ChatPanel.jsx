@@ -5,9 +5,9 @@ import { Send, Sparkles, Loader2, Mic, MicOff, Volume2 } from "lucide-react";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-const DEFAULT_CHIPS = ["Skilled Nursing", "Book Appointment", "Meet the team", "I have knee pain"];
+const DEFAULT_CHIPS = ["Start my intake", "Skilled Nursing", "Book Appointment", "Meet the team"];
 
-const ChatPanel = forwardRef(function ChatPanel({ onIntent }, ref) {
+const ChatPanel = forwardRef(function ChatPanel({ onIntent, onExtract }, ref) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -62,6 +62,7 @@ const ChatPanel = forwardRef(function ChatPanel({ onIntent }, ref) {
       });
       setMessages((prev) => [...prev, { role: "assistant", content: data.reply, intent: data.intent }]);
       if (data.intent) onIntent?.(data.intent);
+      if (data.extracted && Object.keys(data.extracted).length > 0) onExtract?.(data.extracted);
       const next = (data.suggestions && data.suggestions.length ? data.suggestions : DEFAULT_CHIPS).slice(0, 4);
       setSuggestions(next);
     } catch {

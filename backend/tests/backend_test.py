@@ -193,6 +193,7 @@ VALID_INTENTS = {
     "welcome", "page:about", "page:contact", "page:careers", "page:services",
     "action:book_appointment", "action:submit_referral", "action:share_feedback",
     "action:find_care", "action:meet_team", "action:tour_visit", "action:symptom_check",
+    "action:start_intake",
     "service:skilled-nursing", "service:physical-therapy", "service:occupational-therapy",
     "service:speech-therapy", "service:home-health-aide", "service:medical-social-work",
 }

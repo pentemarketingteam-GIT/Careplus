@@ -14,6 +14,7 @@ import TeamCards from "@/components/TeamCards";
 import TourCards from "@/components/TourCards";
 import Testimonials from "@/components/Testimonials";
 import BodyDiagram from "@/components/BodyDiagram";
+import IntakeWizard from "@/components/IntakeWizard";
 import { celebrate } from "@/lib/confetti";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -41,9 +42,10 @@ const INTENT_AMBIENT = {
   "action:meet_team": "moss",
   "action:tour_visit": "warm",
   "action:symptom_check": "mustard",
+  "action:start_intake": "moss",
 };
 
-export default function DynamicView({ intent, onAction }) {
+export default function DynamicView({ intent, onAction, sessionId, extractTick }) {
   const view = resolveView(intent);
   const hue = INTENT_AMBIENT[intent] || "forest";
   return (
@@ -78,6 +80,7 @@ export default function DynamicView({ intent, onAction }) {
           {view === "meet-team" && <MeetTeamView />}
           {view === "tour-visit" && <TourVisitView />}
           {view === "symptom-check" && <SymptomCheckView onAction={onAction} />}
+          {view === "intake" && <IntakeView sessionId={sessionId} refreshTick={extractTick} onAction={onAction} />}
           {view.startsWith("service:") && <ServiceDetailView slug={view.slice(8)} />}
         </motion.div>
       </AnimatePresence>
@@ -99,6 +102,7 @@ function resolveView(intent) {
   if (intent === "action:meet_team") return "meet-team";
   if (intent === "action:tour_visit") return "tour-visit";
   if (intent === "action:symptom_check") return "symptom-check";
+  if (intent === "action:start_intake") return "intake";
   if (intent.startsWith("service:")) return `service:${intent.slice(8)}`;
   return "welcome";
 }
@@ -123,12 +127,12 @@ function SectionLabel({ children }) {
 
 function WelcomeView({ onAction }) {
   const chips = [
+    "Start my intake",
     "Tell me about skilled nursing",
     "Book an appointment",
     "Meet the team",
     "I have knee pain",
     "What does a home visit look like?",
-    "Help me find the right care",
   ];
   return (
     <Frame>
@@ -663,5 +667,21 @@ function FeedbackForm() {
         {busy ? "Sending..." : "Submit feedback"}
       </button>
     </form>
+  );
+}
+
+
+function IntakeView({ sessionId, refreshTick, onAction }) {
+  return (
+    <Frame>
+      <SectionLabel>Patient Intake</SectionLabel>
+      <h2 className="font-display text-5xl md:text-6xl mt-4">
+        Let's get you <span className="serif-italic text-[#D4A537]">set up</span>.
+      </h2>
+      <p className="mt-5 text-lg text-[#C5BFA8] max-w-2xl">
+        Chat with the AI on the right (voice or text) — your answers auto-fill the form below. Or type directly into any field.
+      </p>
+      <IntakeWizard sessionId={sessionId} refreshTick={refreshTick} onAction={onAction} />
+    </Frame>
   );
 }

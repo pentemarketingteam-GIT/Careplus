@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { Menu, X, Phone } from "lucide-react";
 import { BRAND, NAV_LINKS } from "@/lib/brand";
+import AuthButton from "@/components/AuthButton";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
@@ -47,6 +48,7 @@ export default function Header() {
         </nav>
 
         <div className="hidden lg:flex items-center gap-3">
+          <AuthButton variant="light" />
           <a
             href={BRAND.phoneHref}
             data-testid="header-call-btn"
