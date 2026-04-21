@@ -183,3 +183,88 @@ class TestAppointments:
     def test_appointment_missing_required(self, client):
         r = client.post(f"{API}/appointments", json={"name": "x"})
         assert r.status_code == 422
+
+
+
+# ---------- AI Assistant ----------
+import uuid as _uuid
+
+VALID_INTENTS = {
+    "welcome", "page:about", "page:contact", "page:careers", "page:services",
+    "action:book_appointment", "action:submit_referral", "action:share_feedback",
+    "service:skilled-nursing", "service:physical-therapy", "service:occupational-therapy",
+    "service:speech-therapy", "service:home-health-aide", "service:medical-social-work",
+}
+
+
+class TestAssistant:
+    def test_chat_skilled_nursing(self, client):
+        session_id = f"TEST_{_uuid.uuid4()}"
+        r = client.post(f"{API}/assistant/chat", json={
+            "session_id": session_id,
+            "message": "Tell me about skilled nursing",
+        }, timeout=60)
+        assert r.status_code == 200, r.text
+        data = r.json()
+        assert data["session_id"] == session_id
+        assert isinstance(data.get("reply"), str) and len(data["reply"]) > 0
+        # intent is nullable but if present must be valid
+        if data.get("intent") is not None:
+            assert data["intent"] in VALID_INTENTS
+        assert isinstance(data.get("suggestions"), list)
+        assert len(data["suggestions"]) <= 4
+
+        # Verify history persisted — user + assistant
+        h = client.get(f"{API}/assistant/history/{session_id}", timeout=30)
+        assert h.status_code == 200
+        hist = h.json()["messages"]
+        assert len(hist) >= 2
+        roles = [m["role"] for m in hist]
+        assert "user" in roles and "assistant" in roles
+        # chronological order
+        assert hist[0]["role"] == "user"
+        assert hist[0]["content"] == "Tell me about skilled nursing"
+        # no _id leak
+        for m in hist:
+            assert "_id" not in m
+
+    def test_chat_multiturn_context(self, client):
+        session_id = f"TEST_{_uuid.uuid4()}"
+        # turn 1
+        r1 = client.post(f"{API}/assistant/chat", json={
+            "session_id": session_id,
+            "message": "What services do you offer?",
+        }, timeout=60)
+        assert r1.status_code == 200, r1.text
+        # turn 2 — reference prior context
+        r2 = client.post(f"{API}/assistant/chat", json={
+            "session_id": session_id,
+            "message": "Tell me more about the first one.",
+        }, timeout=60)
+        assert r2.status_code == 200, r2.text
+        assert r2.json()["session_id"] == session_id
+
+        h = client.get(f"{API}/assistant/history/{session_id}", timeout=30)
+        msgs = h.json()["messages"]
+        # 2 user + 2 assistant = 4
+        assert len(msgs) >= 4
+        user_msgs = [m for m in msgs if m["role"] == "user"]
+        assert len(user_msgs) >= 2
+
+    def test_chat_book_appointment_intent(self, client):
+        session_id = f"TEST_{_uuid.uuid4()}"
+        r = client.post(f"{API}/assistant/chat", json={
+            "session_id": session_id,
+            "message": "I want to book an appointment",
+        }, timeout=60)
+        assert r.status_code == 200, r.text
+        data = r.json()
+        # LLM should produce a valid intent (we don't force a specific one; just assert sanitized)
+        if data.get("intent") is not None:
+            assert data["intent"] in VALID_INTENTS
+
+    def test_history_empty_session(self, client):
+        session_id = f"TEST_empty_{_uuid.uuid4()}"
+        r = client.get(f"{API}/assistant/history/{session_id}", timeout=30)
+        assert r.status_code == 200
+        assert r.json()["messages"] == []

@@ -8,23 +8,30 @@ import Services from "@/pages/Services";
 import Careers from "@/pages/Careers";
 import Resources from "@/pages/Resources";
 import Contact from "@/pages/Contact";
+import AIExperience from "@/pages/AIExperience";
+import ModeToggle from "@/components/ModeToggle";
+import { ModeProvider } from "@/lib/ModeContext";
 
 function App() {
   return (
     <div className="App">
       <BrowserRouter>
-        <Toaster position="top-center" richColors />
-        <Routes>
-          <Route element={<Layout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/careers" element={<Careers />} />
-            <Route path="/resources" element={<Resources />} />
-            <Route path="/contact" element={<Contact />} />
+        <ModeProvider>
+          <Toaster position="top-center" richColors />
+          <ModeToggle />
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/services" element={<Services />} />
+              <Route path="/careers" element={<Careers />} />
+              <Route path="/resources" element={<Resources />} />
+              <Route path="/contact" element={<Contact />} />
+            </Route>
+            <Route path="/ai" element={<AIExperience />} />
             <Route path="*" element={<Home />} />
-          </Route>
-        </Routes>
+          </Routes>
+        </ModeProvider>
       </BrowserRouter>
     </div>
   );
