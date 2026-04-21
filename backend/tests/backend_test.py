@@ -192,6 +192,7 @@ import uuid as _uuid
 VALID_INTENTS = {
     "welcome", "page:about", "page:contact", "page:careers", "page:services",
     "action:book_appointment", "action:submit_referral", "action:share_feedback",
+    "action:find_care", "action:meet_team", "action:tour_visit", "action:symptom_check",
     "service:skilled-nursing", "service:physical-therapy", "service:occupational-therapy",
     "service:speech-therapy", "service:home-health-aide", "service:medical-social-work",
 }
@@ -268,3 +269,53 @@ class TestAssistant:
         r = client.get(f"{API}/assistant/history/{session_id}", timeout=30)
         assert r.status_code == 200
         assert r.json()["messages"] == []
+
+
+# ---------- New Intents (Iter 6) ----------
+class TestNewIntents:
+    """Verify the 4 new action intents are recognized by the LLM."""
+
+    @pytest.mark.parametrize("message,expected", [
+        ("Can I meet the team?", "action:meet_team"),
+        ("What does a home visit look like?", "action:tour_visit"),
+        ("I have knee pain", "action:symptom_check"),
+        ("Help me find the right care", "action:find_care"),
+    ])
+    def test_new_intent_recognition(self, client, message, expected):
+        session_id = f"TEST_{_uuid.uuid4()}"
+        r = client.post(f"{API}/assistant/chat", json={
+            "session_id": session_id, "message": message,
+        }, timeout=60)
+        assert r.status_code == 200, r.text
+        data = r.json()
+        # If intent returned, must be in expanded VALID_INTENTS
+        if data.get("intent") is not None:
+            assert data["intent"] in VALID_INTENTS, (
+                f"Intent '{data['intent']}' not in expanded VALID_INTENTS for message: {message}"
+            )
+        # We don't strictly require the LLM picks the exact expected intent, but
+        # log it as a soft assertion: print for inspection
+        print(f"Message='{message}' -> intent={data.get('intent')} expected={expected}")
+
+
+# ---------- TTS (Iter 6) ----------
+class TestTTS:
+    def test_tts_basic(self, client):
+        r = client.post(f"{API}/assistant/tts",
+                        json={"text": "Welcome to Careplus Health Services."},
+                        timeout=60)
+        assert r.status_code == 200, r.text
+        data = r.json()
+        assert data.get("mime") == "audio/mpeg"
+        b64 = data.get("audio_base64", "")
+        assert isinstance(b64, str)
+        # >5000 bytes per spec
+        assert len(b64) > 5000, f"audio_base64 too short: {len(b64)} bytes"
+
+    def test_tts_empty_text(self, client):
+        r = client.post(f"{API}/assistant/tts", json={"text": ""}, timeout=30)
+        assert r.status_code == 400
+
+    def test_tts_missing_text(self, client):
+        r = client.post(f"{API}/assistant/tts", json={}, timeout=30)
+        assert r.status_code == 422

@@ -12,6 +12,8 @@ from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
 from emergentintegrations.llm.chat import LlmChat, UserMessage
+from emergentintegrations.llm.openai import OpenAITextToSpeech
+import base64
 
 
 ROOT_DIR = Path(__file__).parent
@@ -184,6 +186,7 @@ async def get_services():
 VALID_INTENTS = {
     "welcome", "page:about", "page:contact", "page:careers", "page:services",
     "action:book_appointment", "action:submit_referral", "action:share_feedback",
+    "action:find_care", "action:meet_team", "action:tour_visit", "action:symptom_check",
     "service:skilled-nursing", "service:physical-therapy", "service:occupational-therapy",
     "service:speech-therapy", "service:home-health-aide", "service:medical-social-work",
 }
@@ -211,6 +214,10 @@ You MUST ALWAYS reply with a single valid JSON object — nothing else, no markd
 Intent selection:
 - If user asks about a specific service → service:<slug>
 - If user asks about company/team/history → page:about
+- If user wants to meet the team / staff photos → action:meet_team
+- If user asks what a visit looks like / day in the life / process → action:tour_visit
+- If user mentions pain, symptoms, body area, or "what care do I need" → action:symptom_check
+- If user wants guided help choosing care → action:find_care
 - If user wants to call/email/reach you → page:contact
 - If user mentions jobs/careers/hiring → page:careers
 - If user wants to schedule/book/set appointment → action:book_appointment
@@ -340,6 +347,29 @@ async def assistant_history(session_id: str):
         if isinstance(r.get("created_at"), str):
             r["created_at"] = datetime.fromisoformat(r["created_at"])
     return {"session_id": session_id, "messages": rows}
+
+
+class TTSRequest(BaseModel):
+    text: str
+
+
+@api_router.post("/assistant/tts")
+async def assistant_tts(payload: TTSRequest):
+    api_key = os.environ.get("EMERGENT_LLM_KEY")
+    if not api_key:
+        raise HTTPException(status_code=500, detail="LLM key not configured")
+    text = (payload.text or "").strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="text is required")
+    text = text[:2000]  # keep TTS costs sane
+    try:
+        tts = OpenAITextToSpeech(api_key=api_key)
+        audio_bytes = await tts.generate_speech(text=text, model="tts-1", voice="coral")
+        b64 = base64.b64encode(audio_bytes).decode("utf-8")
+        return {"audio_base64": b64, "mime": "audio/mpeg"}
+    except Exception as e:
+        logger.exception("TTS failed")
+        raise HTTPException(status_code=502, detail=f"TTS unavailable: {e}")
 
 
 app.include_router(api_router)

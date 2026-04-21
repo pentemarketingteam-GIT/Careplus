@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Phone, MapPin, MessageSquareHeart, ClipboardCheck, ArrowRight, Heart, ShieldCheck, Sparkles } from "lucide-react";
 import { BRAND, SERVICES, ABOUT_POINTS } from "@/lib/brand";
+import Testimonials from "@/components/Testimonials";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -220,6 +221,9 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      {/* TESTIMONIALS */}
+      <Testimonials variant="light" />
 
       {/* CTA STRIP */}
       <section className="mx-auto max-w-7xl px-6 lg:px-10 mt-28" data-testid="cta-strip">
