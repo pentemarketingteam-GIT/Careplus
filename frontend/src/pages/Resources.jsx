@@ -37,7 +37,10 @@ export default function Resources() {
     if (!form.feedback.trim()) return toast.error("Please share your feedback.");
     setSubmitting(true);
     try {
-      await axios.post(`${API}/survey`, { ...form, rating: Number(form.rating) });
+      const payload = { ...form, rating: Number(form.rating) };
+      if (!payload.name) delete payload.name;
+      if (!payload.email) delete payload.email;
+      await axios.post(`${API}/survey`, payload);
       toast.success("Thank you! Your feedback has been received.");
       setForm({ name: "", email: "", rating: 5, feedback: "" });
     } catch {
