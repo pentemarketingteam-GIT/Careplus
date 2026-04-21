@@ -1,54 +1,58 @@
-# Careplus Health Services — Dual-Mode Website (Static + AI Dynamic)
+# Careplus Health Services — Dual-Mode Interactive Website
 
 ## Original Problem Statement
-Initial: "can you build a website?" with reference https://careplus-usa.lovable.app/ (home healthcare agency).
-Follow-up: Add a **dual-mode experience** — keep the static marketing site AND add a dynamic AI-powered experience where an AI assistant chats with users and the left panel changes in real-time based on the conversation (services, about, contact, appointment booking, referral).
+Started: "can you build a website?" with https://careplus-usa.lovable.app/ as inspiration.
+Grew into: dual-mode site (static marketing + AI-powered dynamic) with 10 interactive features + real testimonials + Forest Apothecary palette.
 
 ## Architecture
-- **Frontend**: React 19 + React Router 7 + TailwindCSS + framer-motion + sonner + lucide-react. "Organic & Earthy" palette (sage, terracotta, warm cream) on static; deep midnight + terracotta accents on dynamic. Typography: Cormorant Garamond + Outfit + Manrope.
-- **Backend**: FastAPI + Motor (async MongoDB) + emergentintegrations (Claude Sonnet 4.5). Collections: `contacts`, `referrals`, `surveys`, `appointments`, `chat_messages`.
-- **AI**: Anthropic Claude Sonnet 4.5 via Emergent universal LLM key. Each user message → LLM returns a structured JSON `{reply, intent, suggestions}`. Intent drives the left-panel view on `/ai`.
-- **Mode toggle**: fixed-position `+STATIC / +DYNAMIC` pill auto-synced with the current route (`/` vs `/ai`). Session id persists in localStorage; chat history rehydrates from backend on reload.
+- **Frontend**: React 19 + Router 7 + Tailwind + framer-motion + sonner + lucide-react + canvas-confetti.
+- **Backend**: FastAPI + Motor (async MongoDB) + emergentintegrations (Claude Sonnet 4.5 chat + OpenAI TTS-1 coral voice).
+- **Styling**: Forest Apothecary — parchment #F4F1EA + deep forest #2D4A2B + mustard #C9A227 accent (static); pine-black #0A1410 + mustard glow + moss ambient (dynamic). Cormorant Garamond / Outfit / Manrope.
+- **Collections**: contacts, referrals, surveys, appointments, chat_messages.
 
 ## User Personas
-- Families/patients seeking home healthcare — browse services, converse with AI, book appointments, submit referrals.
-- Potential hires — view Careers (both modes).
-- Existing clients — submit Client Satisfaction Survey.
+- Families/patients seeking home healthcare in Dallas area
+- Potential hires (RN, PT, OT, SLP, HHA, MSW)
+- Existing clients sharing satisfaction feedback
 
-## Core Requirements
-1. Full static marketing site: Home, About, Services, Careers, Resources, Contact (preserves original copy).
-2. Dynamic AI experience `/ai`: dark split layout — left panel renders dynamic view (Welcome, Service detail x6, About, Contact, Careers, Services grid, Book Appointment, Submit Referral, Share Feedback) driven by AI intent.
-3. Right-side chat panel with Claude Sonnet 4.5, multi-turn memory, suggestion chips, typing indicator.
-4. Mode toggle at top-center; visual state matches current URL.
-5. All forms persist to MongoDB with UUID ids.
-6. Distinctive, non-clinical aesthetic across both modes.
+## Core Requirements (static)
+Multi-page static site (Home, About, Services, Careers, Resources, Contact) + dynamic AI experience at /ai with intent-driven left-panel views.
 
 ## What's Been Implemented
-**Iter 1 (2026-04-21) — Static site MVP**
-- 6 pages, full Lovable copy preserved, 4 backend form endpoints (contact, referrals, survey, appointments), services catalog, MongoDB storage, glass nav, dark footer, framer-motion animations.
 
-**Iter 2 (2026-04-21) — AI Dynamic mode**
-- `/api/assistant/chat` + `/api/assistant/history/{session_id}` backend endpoints (Claude Sonnet 4.5 via emergentintegrations).
-- `/ai` route with split-screen: DynamicView (left) + ChatPanel (right).
-- Intent system with 15+ intents driving left-panel views (welcome / page:about / page:contact / page:careers / page:services / action:book_appointment / action:submit_referral / action:share_feedback / service:<slug>).
-- ModeToggle with route-synced active state; auto-resets mode when URL changes.
-- Suggestion chips regenerated per assistant reply, default 4 chips.
-- Dark-themed inline forms (Appointment, Referral, Feedback) inside the dynamic view.
-- Conversation rehydration on reload via GET history endpoint; last assistant intent re-dispatched so the left panel matches where the user left off.
+**Iter 1 — Static MVP**: 6 pages, contact/referral/survey/appointment endpoints, Mongo storage.
+
+**Iter 2 — AI Dynamic mode**: /api/assistant/chat with Claude Sonnet 4.5, /ai split layout, intent routing (11 intents), rehydration on reload, mode toggle, 25+ data-testids.
+
+**Iter 3 (palette)** — Forest Apothecary applied globally; service images switched to reliable Pexels URLs.
+
+**Iter 4 — 10 Interactive features + Testimonials**
+1. Living ambient particles (14 drifting breath-orbs, hue shifts per intent)
+2. Intent-reactive ambient color (welcome→mustard, contact→forest, careers→moss, etc.)
+3. Typing-responsive glow on chat input; thinking aura on left panel while AI works
+4. Hand-drawn animated SVG illustrations for all 6 services (self-drawing on view entry)
+5. AI voice mode — Web Speech API mic input + OpenAI TTS-1 "coral" voice playback per assistant message (POST /api/assistant/tts → base64 mp3)
+6. Body diagram "Where does it hurt?" with 7 clickable regions auto-generating AI prompt
+7. "Help me find the right care" card-stack with 6 guided options
+8. Team flip cards (4 clinicians, tap to reveal bio) for action:meet_team intent
+9. Gratitude confetti + personalized first-name thank-you toast on every form submit
+10. "Tour of a visit" 5-step animated scroll for action:tour_visit intent
+- 3 real testimonials (Sarah J., Robert M., Elena R., all 5-star) rendered on static Home + dynamic AboutView + as callout on service-detail views.
+
+### New intents added
+action:find_care, action:meet_team, action:tour_visit, action:symptom_check — all verified routing end-to-end with Claude.
 
 ## Testing status
-- Backend: 19/19 pytest passing (includes 4 AI assistant tests: single-turn, multi-turn context, invalid-intent sanitization, empty-history).
-- Frontend: All critical flows verified by testing agent (iter 5): mode toggle, chat send (direct click + Enter), intent→view transition, appointment/referral/feedback form submit, chat rehydration on reload, static-page regression.
+- Backend: **26/26 pytest passing** (includes 4 new-intent tests + 3 TTS tests).
+- Frontend: 100% pass on all iter-6 features (welcome chips, mic, TTS, confetti, intent→view transitions, testimonials, mode toggle regression).
 
 ## Prioritized Backlog
-- **P1**: Dedicated Service Areas page with ZIP list or map (currently handled via contact info card).
-- **P1**: Admin auth + protected routes for GET /api/contacts, /api/referrals (currently public — PHI-adjacent risk before production).
-- **P1**: Email notifications (SendGrid/Resend) on form submission + new chat sessions for instant lead response.
-- **P2**: Deduplicate the mobile+desktop ChatPanel instances into a single responsive component (minor, wasteful double history fetch).
-- **P2**: Rate limiting + session ownership on /api/assistant/history.
-- **P2**: Stream LLM responses for lower perceived latency.
-- **P3**: Multilingual support (Spanish), testimonials, blog library.
+- **P2**: Replace native date input with shadcn Calendar in dynamic appointment form for visual consistency.
+- **P2**: Admin auth + protected GET endpoints for contacts/referrals (PHI risk pre-production).
+- **P2**: SendGrid/Resend email notifications on every form submission.
+- **P2**: Deduplicate mobile+desktop ChatPanel instances (minor duplicate history fetch).
+- **P3**: Streaming LLM responses, Spanish i18n, rate-limiting on /api/assistant endpoints, appointment calendar time-slots.
 
 ## Next Actions
-- Confirm the dual-mode UX with the user.
-- Decide on P1 items: admin auth + email notifications.
+- Gather user feedback on new interactive features.
+- Decide on P2 items (email notifications, admin auth) for production readiness.

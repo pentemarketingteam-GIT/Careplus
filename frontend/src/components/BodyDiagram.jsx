@@ -50,6 +50,7 @@ export default function BodyDiagram({ onPick }) {
                 stroke="#D4A537"
                 strokeWidth={isHover ? "2" : "1"}
                 strokeDasharray={isHover ? "0" : "3 3"}
+                initial={false}
                 animate={{ r: isHover ? r.r + 4 : r.r }}
                 transition={{ duration: 0.25 }}
                 style={{ cursor: "pointer" }}
