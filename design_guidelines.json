@@ -1,0 +1,108 @@
+{
+  "theme": "Light",
+  "archetype": "1 (Organic & Earthy)",
+  "vibe": "Warm, trustworthy, calming, and high-end. Avoid clinical blues.",
+  "colors": {
+    "background_base": "#FDFBF7",
+    "background_secondary": "#F3EFE6",
+    "surface": "#FFFFFF",
+    "primary": "#4A6741",
+    "primary_hover": "#3D5636",
+    "accent": "#C17767",
+    "text_primary": "#2D312E",
+    "text_secondary": "#5C635A",
+    "border": "#E5E1D8"
+  },
+  "typography": {
+    "fonts": {
+      "headings": "Cormorant Garamond",
+      "body": "Outfit",
+      "labels": "Manrope"
+    },
+    "hierarchy": {
+      "h1": "text-5xl md:text-6xl tracking-tight font-medium leading-none text-text_primary",
+      "h2": "text-3xl md:text-4xl tracking-tight font-medium text-text_primary",
+      "h3": "text-xl md:text-2xl font-medium text-text_primary",
+      "body": "text-base leading-relaxed text-text_secondary",
+      "overline": "text-xs tracking-[0.2em] uppercase font-semibold text-primary"
+    }
+  },
+  "layout_and_spacing": {
+    "global": "Generous spacing. Use p-8 to p-16 for containers. Avoid centering everything.",
+    "bento_grid": "Use asymmetrical bento layouts for the 3 quick-access cards and services.",
+    "hero_section": "Asymmetrical layout. Image either gracefully overlapping or given generous breathing room. Use soft glassmorphism for any floating blocks over the image.",
+    "surfaces": "Soft borders (1px border-border), very light shadow on hover for cards. Rounded corners: rounded-2xl or rounded-3xl."
+  },
+  "components_instructions": {
+    "buttons": "Primary buttons: bg-primary text-white rounded-full px-8 py-4 hover:-translate-y-1 transition-transform. Accent buttons: bg-accent text-white.",
+    "cards": "Services cards should be cardless or flat with subtle 1px border. Hover effect: slight lift and shadow-lg.",
+    "header": "Glassmorphism header: backdrop-blur-xl bg-background_base/70, border-b border-border/40, sticky top-0 z-50.",
+    "footer": "Deep dark footer: bg-[#2D312E] text-[#FDFBF7] py-20. Large CTA text.",
+    "icons": "Use lucide-react (thin/light strokes for an elegant feel).",
+    "forms": "Use Shadcn Form, Input, Textarea. Override generic borders with softer radius."
+  },
+  "media": {
+    "hero_image": "https://images.unsplash.com/photo-1658632302217-984d432b4d38?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzZ8MHwxfHNlYXJjaHwyfHxzZW5pb3IlMjBjYXJlJTIwYXQlMjBob21lJTIwd2FybXxlbnwwfHx8fDE3NzY3ODc5NDF8MA&ixlib=rb-4.1.0&q=85",
+    "services_images": [
+      "https://images.unsplash.com/photo-1765896387387-0538bc9f997e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2OTV8MHwxfHNlYXJjaHwyfHxudXJzZSUyMHBoeXNpY2FsJTIwdGhlcmFweSUyMGhvbWV8ZW58MHx8fHwxNzc2Nzg3OTQxfDA&ixlib=rb-4.1.0&q=85",
+      "https://images.unsplash.com/photo-1765896387398-1e1ae8d2eb85?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2OTV8MHwxfHNlYXJjaHwzfHxudXJzZSUyMHBoeXNpY2FsJTIwdGhlcmFweSUyMGhvbWV8ZW58MHx8fHwxNzc2Nzg3OTQxfDA&ixlib=rb-4.1.0&q=85",
+      "https://images.pexels.com/photos/7551627/pexels-photo-7551627.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+    ],
+    "about_image": "https://images.pexels.com/photos/29372724/pexels-photo-29372724.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "contact_bg": "https://images.pexels.com/photos/8088597/pexels-photo-8088597.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+  },
+  "content_structure": {
+    "hero": {
+      "headline": "Supportive Care. Compassionate Care.",
+      "subheadline": "Let Careplus Health Services, Inc. be your source of supportive and compassionate care at home.",
+      "cta_primary": "Call 214-234-1612",
+      "cta_secondary": "Set an Appointment"
+    },
+    "quick_access": [
+      {
+        "title": "Service Areas COVERED",
+        "desc": "Our company serves Dallas and the surrounding counties."
+      },
+      {
+        "title": "Client Satisfaction SURVEY",
+        "desc": "Please send your feedback and comments."
+      },
+      {
+        "title": "Submit your REFERRALS",
+        "desc": "Send your recommendations online."
+      }
+    ],
+    "about": {
+      "title": "Welcome to Careplus Health Services, Inc.",
+      "desc": "Our company offers a comprehensive range of physician-directed healthcare services for patients in their homes. We strive to provide the highest quality of care with compassion and professionalism.",
+      "points": [
+        "A way for the patient to remain at home",
+        "Reduce risk of re-hospitalization",
+        "Adjust to health post-surgery",
+        "Flexible and less costly",
+        "Personalized services"
+      ]
+    },
+    "services": [
+      "Skilled Nursing",
+      "Physical Therapy",
+      "Occupational Therapy",
+      "Speech Therapy",
+      "Home Health Aide",
+      "Medical Social Work"
+    ],
+    "contact": {
+      "phone": "214-234-1612",
+      "areas": "Dallas and surrounding counties"
+    }
+  },
+  "instructions_to_main_agent": [
+    "Follow the theme and colors strictly. Do NOT use default clinical blues (#1B93A4) or purples.",
+    "For typography, import Cormorant Garamond and Outfit from Google Fonts.",
+    "Do NOT use standard Bootstrap/Shadcn equal-sized cards for everything. Use an asymmetrical Bento Grid for the Quick Access Cards.",
+    "Use framer-motion for smooth entrance animations (staggered lists, hover states).",
+    "Ensure all interactive elements have data-testid attributes.",
+    "The hero image should have a gentle gradient overlay or be placed beautifully on the side to prevent text collisions.",
+    "Implement the 'Glassmorphism' effect for the floating navigation bar."
+  ]
+}
