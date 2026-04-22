@@ -337,8 +337,11 @@ async def assistant_chat(payload: AssistantMessage):
     try:
         raw = await chat.send_message(UserMessage(text=user_text))
     except Exception as e:
+        err = str(e)
         logger.exception("LLM call failed")
-        raise HTTPException(status_code=502, detail=f"AI unavailable: {e}")
+        if "budget" in err.lower() or "exceeded" in err.lower():
+            raise HTTPException(status_code=402, detail="AI budget exceeded. Please top up the Emergent Universal Key.")
+        raise HTTPException(status_code=502, detail=f"AI unavailable: {err}")
 
     parsed = _extract_json(raw if isinstance(raw, str) else str(raw))
     reply_text = (parsed.get("reply") or (raw if isinstance(raw, str) else "")).strip()

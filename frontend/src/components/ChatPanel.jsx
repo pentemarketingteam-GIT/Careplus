@@ -65,11 +65,13 @@ const ChatPanel = forwardRef(function ChatPanel({ onIntent, onExtract }, ref) {
       if (data.extracted && Object.keys(data.extracted).length > 0) onExtract?.(data.extracted);
       const next = (data.suggestions && data.suggestions.length ? data.suggestions : DEFAULT_CHIPS).slice(0, 4);
       setSuggestions(next);
-    } catch {
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: "Sorry — I had trouble reaching the assistant. Please try again or call 214-234-1612." },
-      ]);
+    } catch (e) {
+      const detail = e?.response?.data?.detail || "";
+      const isBudget = /budget/i.test(detail);
+      const msg = isBudget
+        ? "The AI assistant is temporarily unavailable (usage limit reached). You can still call us at 214-234-1612 or fill the intake form on the left manually."
+        : "Sorry — I had trouble reaching the assistant. Please try again or call 214-234-1612.";
+      setMessages((prev) => [...prev, { role: "assistant", content: msg }]);
     } finally {
       setBusy(false);
     }
