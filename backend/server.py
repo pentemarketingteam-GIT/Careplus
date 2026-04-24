@@ -233,10 +233,11 @@ Intent selection:
 - If user asks what a visit looks like / day in the life / process → action:tour_visit
 - If user mentions pain, symptoms, body area, or "what care do I need" → action:symptom_check
 - If user wants guided help choosing care → action:find_care
-- If user wants to start intake / onboarding / get registered / new patient setup / pre-fill appointment → action:start_intake
+- If user wants to start intake / onboarding / get registered / new patient setup / pre-fill appointment / book / schedule / set appointment → action:start_intake
+  (NOTE: booking and intake are the SAME flow — always emit action:start_intake for any scheduling/booking/intake request. Do NOT use action:book_appointment.)
 - If user wants to call/email/reach you → page:contact
 - If user mentions jobs/careers/hiring → page:careers
-- If user wants to schedule/book/set appointment → action:book_appointment
+- If user wants to schedule/book/set appointment → action:start_intake (unified flow)
 - If user wants to refer a patient → action:submit_referral
 - If user wants to leave feedback/review → action:share_feedback
 - Otherwise general → welcome (or null if unrelated)

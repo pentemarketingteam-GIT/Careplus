@@ -73,7 +73,6 @@ export default function DynamicView({ intent, onAction, sessionId, extractTick }
           {view === "contact" && <ContactView />}
           {view === "careers" && <CareersView />}
           {view === "services" && <ServicesGridView />}
-          {view === "book" && <BookView />}
           {view === "referral" && <ReferralView />}
           {view === "feedback" && <FeedbackView />}
           {view === "find-care" && <FindCareView onAction={onAction} />}
@@ -95,7 +94,8 @@ function resolveView(intent) {
   if (intent === "page:contact") return "contact";
   if (intent === "page:careers") return "careers";
   if (intent === "page:services") return "services";
-  if (intent === "action:book_appointment") return "book";
+  // Merge: book_appointment & start_intake share the unified IntakeView
+  if (intent === "action:book_appointment") return "intake";
   if (intent === "action:submit_referral") return "referral";
   if (intent === "action:share_feedback") return "feedback";
   if (intent === "action:find_care") return "find-care";
@@ -127,12 +127,12 @@ function SectionLabel({ children }) {
 
 function WelcomeView({ onAction }) {
   const chips = [
-    { label: "Start my intake", prompt: "Start my intake", intent: "action:start_intake" },
+    { label: "Book an appointment", prompt: "I'd like to book an appointment", intent: "action:start_intake" },
     { label: "Tell me about skilled nursing", prompt: "Tell me about skilled nursing", intent: "service:skilled-nursing" },
-    { label: "Book an appointment", prompt: "Book an appointment", intent: "action:book_appointment" },
     { label: "Meet the team", prompt: "Meet the team", intent: "action:meet_team" },
     { label: "I have knee pain", prompt: "I have knee pain — what service should I consider?", intent: "action:symptom_check" },
     { label: "What does a home visit look like?", prompt: "What does a home visit look like?", intent: "action:tour_visit" },
+    { label: "Help me find the right care", prompt: "Help me find the right care", intent: "action:find_care" },
   ];
   return (
     <Frame>
@@ -362,19 +362,6 @@ function CareersView() {
   );
 }
 
-function BookView() {
-  return (
-    <Frame>
-      <SectionLabel>Book Appointment</SectionLabel>
-      <h2 className="font-display text-5xl md:text-6xl mt-4">Schedule your visit.</h2>
-      <p className="mt-5 text-lg text-[var(--ai-fg-2)] max-w-2xl">
-        Tell the assistant your preferred date and service — or use the form below. We'll reach out within one business day.
-      </p>
-      <AppointmentForm />
-    </Frame>
-  );
-}
-
 function ReferralView() {
   return (
     <Frame>
@@ -531,51 +518,6 @@ function DarkField({ label, testid, ...props }) {
   );
 }
 
-function AppointmentForm() {
-  const [f, setF] = useState({ name: "", phone: "", email: "", preferred_date: "", service: "", notes: "" });
-  const [busy, setBusy] = useState(false);
-  const submit = async (e) => {
-    e.preventDefault();
-    if (!f.name || !f.phone) return toast.error("Name and phone are required.");
-    setBusy(true);
-    try {
-      const payload = { ...f };
-      if (!payload.email) delete payload.email;
-      await axios.post(`${API}/appointments`, payload);
-      celebrate();
-      toast.success(`Thank you, ${f.name.split(" ")[0]}! We'll reach out within one business day.`);
-      setF({ name: "", phone: "", email: "", preferred_date: "", service: "", notes: "" });
-    } catch {
-      toast.error("Something went wrong. Please try again.");
-    } finally {
-      setBusy(false);
-    }
-  };
-  return (
-    <form onSubmit={submit} className="mt-8 grid md:grid-cols-2 gap-4" data-testid="dyn-appointment-form">
-      <DarkField label="Full name *" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} testid="appt-name" required />
-      <DarkField label="Phone *" value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} testid="appt-phone" required />
-      <DarkField label="Email" type="email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} testid="appt-email" />
-      <DarkField label="Preferred date" type="date" value={f.preferred_date} onChange={(e) => setF({ ...f, preferred_date: e.target.value })} testid="appt-date" />
-      <DarkField label="Service" placeholder="e.g. Skilled Nursing" value={f.service} onChange={(e) => setF({ ...f, service: e.target.value })} testid="appt-service" />
-      <div className="md:col-span-2">
-        <div className="text-xs text-[var(--ai-fg-3)] mb-1.5 tracking-wide">Notes</div>
-        <textarea
-          rows={4}
-          value={f.notes}
-          onChange={(e) => setF({ ...f, notes: e.target.value })}
-          data-testid="appt-notes"
-          className="w-full rounded-xl px-4 py-3 ai-surface border ai-border text-[var(--ai-fg)] outline-none focus:border-[var(--ai-accent)]"
-        />
-      </div>
-      <button disabled={busy} className="btn-accent md:col-span-2" data-testid="appt-submit-btn">
-        <Calendar className="h-4 w-4" strokeWidth={1.5} />
-        {busy ? "Sending..." : "Request appointment"}
-      </button>
-    </form>
-  );
-}
-
 function ReferralForm() {
   const [f, setF] = useState({ referrer_name: "", referrer_phone: "", patient_name: "", patient_condition: "", notes: "" });
   const [busy, setBusy] = useState(false);
@@ -680,12 +622,12 @@ function FeedbackForm() {
 function IntakeView({ sessionId, refreshTick, onAction }) {
   return (
     <Frame>
-      <SectionLabel>Patient Intake</SectionLabel>
+      <SectionLabel>Book your appointment</SectionLabel>
       <h2 className="font-display text-5xl md:text-6xl mt-4">
-        Let's get you <span className="serif-italic text-[var(--ai-accent)]">set up</span>.
+        Let's get you <span className="serif-italic text-[var(--ai-accent)]">scheduled</span>.
       </h2>
       <p className="mt-5 text-lg text-[var(--ai-fg-2)] max-w-2xl">
-        Chat with the AI on the right (voice or text) — your answers auto-fill the form below. Or type directly into any field.
+        Chat with the AI on the right (voice or text) — your answers auto-fill the form. Or type directly into any field. Submit when you're ready.
       </p>
       <IntakeWizard sessionId={sessionId} refreshTick={refreshTick} onAction={onAction} />
     </Frame>

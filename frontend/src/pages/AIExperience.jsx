@@ -29,9 +29,28 @@ function AIExperienceInner() {
     setSessionId(id);
   }, []);
 
+  // Keep the user on the intake/booking screen while they're filling it in.
+  // Only allow the AI to switch away on EXPLICIT user intents (welcome/referral/feedback/logout).
+  const handleAiIntent = (nextIntent) => {
+    const EXPLICIT_SWITCH = new Set([
+      "welcome",
+      "action:submit_referral",
+      "action:share_feedback",
+      "page:contact",
+      "page:careers",
+    ]);
+    setIntent((current) => {
+      const stickyViews = ["action:start_intake", "action:book_appointment"];
+      if (stickyViews.includes(current) && !EXPLICIT_SWITCH.has(nextIntent)) {
+        return current; // stay on intake
+      }
+      return nextIntent;
+    });
+  };
+
   const handleAction = (a) => {
     if (a?.type === "prompt" && chatRef.current) chatRef.current.send(a.value);
-    if (a?.type === "set_intent" && a.intent) setIntent(a.intent);
+    if (a?.type === "set_intent" && a.intent) setIntent(a.intent); // user-initiated → always allow
     if (a?.type === "intake_submitted") setIntent("welcome");
   };
 
@@ -97,7 +116,7 @@ function AIExperienceInner() {
           style={{ borderLeft: "1px solid var(--ai-border)" }}
           data-testid="chat-right-panel"
         >
-          <ChatPanel ref={chatRef} onIntent={setIntent} onExtract={handleExtract} />
+          <ChatPanel ref={chatRef} onIntent={handleAiIntent} onExtract={handleExtract} />
         </aside>
       </div>
 
@@ -105,7 +124,7 @@ function AIExperienceInner() {
         className="md:hidden h-[55vh]"
         style={{ borderTop: "1px solid var(--ai-border)" }}
       >
-        <ChatPanel ref={chatRef} onIntent={setIntent} onExtract={handleExtract} />
+        <ChatPanel ref={chatRef} onIntent={handleAiIntent} onExtract={handleExtract} />
       </div>
     </div>
   );

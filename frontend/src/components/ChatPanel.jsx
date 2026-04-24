@@ -5,7 +5,7 @@ import { Send, Sparkles, Loader2, Mic, MicOff, Volume2, Home, RotateCcw } from "
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
-const DEFAULT_CHIPS = ["Start my intake", "Skilled Nursing", "Book Appointment", "Meet the team"];
+const DEFAULT_CHIPS = ["Book appointment", "Skilled Nursing", "Meet the team", "I have knee pain"];
 
 const ChatPanel = forwardRef(function ChatPanel({ onIntent, onExtract }, ref) {
   const [messages, setMessages] = useState([]);
