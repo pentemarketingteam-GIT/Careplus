@@ -276,6 +276,89 @@ class ChatRecord(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
+def _regex_extract(text: str, history_tail: List[dict]) -> Dict[str, Any]:
+    """Deterministic fallback extraction. Catches patterns Claude sometimes misses
+    (bare names, phone numbers, emails) especially on short replies."""
+    out: Dict[str, Any] = {}
+    t = (text or "").strip()
+    if not t:
+        return out
+
+    # Email
+    m = re.search(r"[\w.+-]+@[\w-]+\.[\w.-]+", t)
+    if m:
+        out["email"] = m.group(0)
+
+    # Phone: 7+ digits (with optional separators / country code)
+    phone_match = re.search(r"(?:\+?\d[\s().-]*){7,}", t)
+    if phone_match:
+        digits_only = re.sub(r"\D", "", phone_match.group(0))
+        if 7 <= len(digits_only) <= 15:
+            out["phone"] = phone_match.group(0).strip()
+
+    # Urgency keywords
+    low = t.lower()
+    if re.search(r"\burgent\b|\basap\b|emergency|right away|immediately", low):
+        out["urgency"] = "urgent"
+    elif re.search(r"this week|soon|next few days|few days", low):
+        out["urgency"] = "soon"
+    elif re.search(r"\broutine\b|no rush|whenever", low):
+        out["urgency"] = "routine"
+
+    # Caregiver relationship
+    rel_map = {
+        r"\b(myself|for me|i am the patient|it's for me)\b": "self",
+        r"\bmy (wife|husband|spouse|partner)\b": "spouse",
+        r"\bmy (mom|mother|dad|father|parent)\b": "parent",
+        r"\bmy (son|daughter|kid|child)\b": "child",
+        r"\bmy (sister|brother|sibling)\b": "sibling",
+    }
+    for pat, val in rel_map.items():
+        if re.search(pat, low):
+            out["caregiver_relationship"] = val
+            break
+
+    # Service slug detection
+    service_map = {
+        "skilled-nursing": r"skilled nursing|\bnurse|nursing care",
+        "physical-therapy": r"physical therapy|\bpt\b|physio",
+        "occupational-therapy": r"occupational therapy|\bot\b",
+        "speech-therapy": r"speech therapy|speech[- ]language|\bslp\b|swallow",
+        "home-health-aide": r"home health aide|\bhha\b|aide|personal care",
+        "medical-social-work": r"social work|social worker|\bmsw\b",
+    }
+    for slug, pat in service_map.items():
+        if re.search(pat, low):
+            out["service"] = slug
+            break
+
+    # Bare name detection: if the previous assistant message asked "name" AND
+    # current message is 1-5 capitalized words without keywords, treat as name.
+    last_asst = next(
+        (m for m in reversed(history_tail) if m.get("role") == "assistant"),
+        None,
+    )
+    if last_asst and re.search(r"\bname\b", last_asst.get("content", "").lower()):
+        stripped = re.sub(r"[^\w\s.'-]", "", t).strip()
+        words = stripped.split()
+        if (
+            1 <= len(words) <= 5
+            and all(w[:1].isalpha() for w in words)
+            and not re.search(r"\d", stripped)
+            and len(stripped) <= 60
+            and "name" not in low
+        ):
+            out["name"] = stripped
+
+    # Bare insurance-id (alphanumeric 6-20 when asked)
+    if last_asst and re.search(r"insurance (id|member id|number)", last_asst.get("content", "").lower()):
+        id_m = re.search(r"[A-Za-z0-9-]{6,20}", t)
+        if id_m and not out.get("phone") and not out.get("email"):
+            out["insurance_id"] = id_m.group(0)
+
+    return out
+
+
 def _extract_json(text: str) -> dict:
     """Pull the first JSON object out of a string (robust to stray prose)."""
     text = text.strip()
@@ -358,6 +441,11 @@ async def assistant_chat(payload: AssistantMessage):
         extracted = {}
     # keep only whitelisted fields
     extracted = {k: v for k, v in extracted.items() if k in INTAKE_FIELDS and v not in (None, "")}
+
+    # Deterministic regex fallback — backfills fields Claude missed
+    regex_hits = _regex_extract(payload.message, history[-6:] if history else [])
+    for k, v in regex_hits.items():
+        extracted.setdefault(k, v)
 
     if not reply_text:
         reply_text = "I'm here to help with Careplus home healthcare. Could you tell me a bit more about what you're looking for?"
