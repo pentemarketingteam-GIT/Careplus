@@ -127,12 +127,12 @@ function SectionLabel({ children }) {
 
 function WelcomeView({ onAction }) {
   const chips = [
-    "Start my intake",
-    "Tell me about skilled nursing",
-    "Book an appointment",
-    "Meet the team",
-    "I have knee pain",
-    "What does a home visit look like?",
+    { label: "Start my intake", prompt: "Start my intake", intent: "action:start_intake" },
+    { label: "Tell me about skilled nursing", prompt: "Tell me about skilled nursing", intent: "service:skilled-nursing" },
+    { label: "Book an appointment", prompt: "Book an appointment", intent: "action:book_appointment" },
+    { label: "Meet the team", prompt: "Meet the team", intent: "action:meet_team" },
+    { label: "I have knee pain", prompt: "I have knee pain — what service should I consider?", intent: "action:symptom_check" },
+    { label: "What does a home visit look like?", prompt: "What does a home visit look like?", intent: "action:tour_visit" },
   ];
   return (
     <Frame>
@@ -155,14 +155,17 @@ function WelcomeView({ onAction }) {
       <p className="mt-2 text-center text-xl text-[var(--ai-fg-3)]">Ask our AI assistant anything to get started.</p>
 
       <div className="mt-16 flex flex-wrap justify-center gap-3 text-sm text-[var(--ai-fg-3)]">
-        {chips.map((s) => (
+        {chips.map((c) => (
           <button
-            key={s}
-            onClick={() => onAction?.({ type: "prompt", value: s })}
+            key={c.label}
+            onClick={() => {
+              onAction?.({ type: "set_intent", intent: c.intent });
+              onAction?.({ type: "prompt", value: c.prompt });
+            }}
             className="rounded-full px-4 py-2 border ai-border hover:border-[var(--ai-accent)]/60 hover:text-[var(--ai-fg)] hover:ai-surface transition-all"
-            data-testid={`welcome-suggestion-${s.slice(0, 10).replace(/\s+/g, "-")}`}
+            data-testid={`welcome-suggestion-${c.label.slice(0, 10).replace(/\s+/g, "-")}`}
           >
-            Try asking: {s}
+            Try asking: {c.label}
           </button>
         ))}
       </div>
@@ -441,6 +444,9 @@ function SymptomCheckView({ onAction }) {
       <div className="mt-10 flex justify-center">
         <BodyDiagram
           onPick={(region) => {
+            // Immediately show the care suggestion (works even if AI is unavailable)
+            if (region.suggest) onAction?.({ type: "set_intent", intent: `service:${region.suggest}` });
+            // Also send to chat for conversational context / AI follow-up
             onAction?.({
               type: "prompt",
               value: `I'm experiencing discomfort in my ${region.label.toLowerCase()}. Which service would help?`,

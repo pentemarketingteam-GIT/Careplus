@@ -31,6 +31,7 @@ function AIExperienceInner() {
 
   const handleAction = (a) => {
     if (a?.type === "prompt" && chatRef.current) chatRef.current.send(a.value);
+    if (a?.type === "set_intent" && a.intent) setIntent(a.intent);
     if (a?.type === "intake_submitted") setIntent("welcome");
   };
 
