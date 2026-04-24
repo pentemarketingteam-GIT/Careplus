@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useImperativeHandle, forwardRef } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Sparkles, Loader2, Mic, MicOff, Volume2 } from "lucide-react";
+import { Send, Sparkles, Loader2, Mic, MicOff, Volume2, Home, RotateCcw } from "lucide-react";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -18,6 +18,28 @@ const ChatPanel = forwardRef(function ChatPanel({ onIntent, onExtract }, ref) {
   const listRef = useRef(null);
   const recognitionRef = useRef(null);
   const audioRef = useRef(null);
+
+  const goHome = () => {
+    onIntent?.("welcome");
+  };
+
+  const resetConversation = async () => {
+    if (!window.confirm("Start a new conversation? This will clear your chat history.")) return;
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+      setSpeakingIdx(null);
+    }
+    // New session id → fresh chat + intake draft
+    const newId = crypto.randomUUID();
+    sessionRef.current = newId;
+    localStorage.setItem("careplus-session", newId);
+    setMessages([]);
+    setInput("");
+    setSuggestions(DEFAULT_CHIPS);
+    onIntent?.("welcome");
+    onExtract?.();
+  };
 
   useEffect(() => {
     if (!sessionRef.current) {
@@ -163,6 +185,26 @@ const ChatPanel = forwardRef(function ChatPanel({ onIntent, onExtract }, ref) {
             <div className="font-display text-lg text-[var(--ai-fg)] leading-none">CarePlus AI</div>
             <div className="text-[10px] tracking-[0.18em] uppercase text-[var(--ai-fg-3)] mt-1">always on · claude sonnet 4.5</div>
           </div>
+        </div>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={goHome}
+            data-testid="chat-home-btn"
+            aria-label="Back to welcome"
+            title="Back to welcome"
+            className="h-9 w-9 rounded-full flex items-center justify-center border ai-border transition-all text-[var(--ai-fg-3)] hover:text-[var(--ai-accent)]"
+          >
+            <Home className="h-4 w-4" strokeWidth={1.6} />
+          </button>
+          <button
+            onClick={resetConversation}
+            data-testid="chat-reset-btn"
+            aria-label="Start new conversation"
+            title="Start new conversation (clears chat)"
+            className="h-9 w-9 rounded-full flex items-center justify-center border ai-border transition-all text-[var(--ai-fg-3)] hover:text-[var(--ai-accent)]"
+          >
+            <RotateCcw className="h-4 w-4" strokeWidth={1.6} />
+          </button>
         </div>
       </div>
 
