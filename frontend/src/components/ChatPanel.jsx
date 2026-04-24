@@ -135,7 +135,7 @@ const ChatPanel = forwardRef(function ChatPanel({ onIntent, onExtract }, ref) {
   return (
     <div
       className="h-full w-full flex flex-col relative"
-      style={{ background: "linear-gradient(180deg, rgba(10,20,16,0.96) 0%, rgba(8,16,12,0.98) 100%)" }}
+      style={{ background: "var(--ai-chat-bg)" }}
       data-testid="chat-panel"
     >
       {/* Thinking aura */}
@@ -154,14 +154,14 @@ const ChatPanel = forwardRef(function ChatPanel({ onIntent, onExtract }, ref) {
         )}
       </AnimatePresence>
 
-      <div className="flex items-center justify-between px-6 py-5 border-b border-white/10 relative">
+      <div className="flex items-center justify-between px-6 py-5 border-b ai-border relative">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #D4A537, #C9A227)" }}>
-            <Sparkles className="h-4 w-4 text-[#1A1F1B]" strokeWidth={1.8} />
+          <div className="h-9 w-9 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, var(--ai-accent), var(--ai-accent-2))" }}>
+            <Sparkles className="h-4 w-4 text-[var(--ai-ink)]" strokeWidth={1.8} />
           </div>
           <div>
-            <div className="font-display text-lg text-[#F0EADB] leading-none">CarePlus AI</div>
-            <div className="text-[10px] tracking-[0.18em] uppercase text-[#B5AD99] mt-1">always on · claude sonnet 4.5</div>
+            <div className="font-display text-lg text-[var(--ai-fg)] leading-none">CarePlus AI</div>
+            <div className="text-[10px] tracking-[0.18em] uppercase text-[var(--ai-fg-3)] mt-1">always on · claude sonnet 4.5</div>
           </div>
         </div>
       </div>
@@ -169,8 +169,8 @@ const ChatPanel = forwardRef(function ChatPanel({ onIntent, onExtract }, ref) {
       <div ref={listRef} className="flex-1 overflow-y-auto px-5 py-6 space-y-4 relative" data-testid="chat-messages">
         {messages.length === 0 && (
           <div className="text-center py-8">
-            <div className="font-display text-2xl text-[#F0EADB]">How can I help?</div>
-            <p className="text-sm text-[#B5AD99] mt-2">Ask about services, book an appointment, or submit a referral.</p>
+            <div className="font-display text-2xl text-[var(--ai-fg)]">How can I help?</div>
+            <p className="text-sm text-[var(--ai-fg-3)] mt-2">Ask about services, book an appointment, or submit a referral.</p>
           </div>
         )}
 
@@ -187,12 +187,12 @@ const ChatPanel = forwardRef(function ChatPanel({ onIntent, onExtract }, ref) {
               <div className={`flex flex-col gap-1 max-w-[88%] ${m.role === "user" ? "items-end" : "items-start"}`}>
                 <div
                   className={`rounded-2xl px-4 py-3 text-[15px] leading-relaxed ${
-                    m.role === "user" ? "text-[#1A1F1B]" : "text-[#F0EADB] border border-white/10"
+                    m.role === "user" ? "text-[var(--ai-ink)]" : "text-[var(--ai-fg)] border ai-border"
                   }`}
                   style={
                     m.role === "user"
-                      ? { background: "linear-gradient(135deg, #D4A537, #C9A227)" }
-                      : { background: "rgba(255,255,255,0.04)" }
+                      ? { background: "linear-gradient(135deg, var(--ai-accent), var(--ai-accent-2))" }
+                      : { background: "var(--ai-surface)" }
                   }
                 >
                   {m.content}
@@ -200,8 +200,8 @@ const ChatPanel = forwardRef(function ChatPanel({ onIntent, onExtract }, ref) {
                 {m.role === "assistant" && (
                   <button
                     onClick={() => playTTS(i, m.content)}
-                    className={`text-[10px] inline-flex items-center gap-1 px-2 py-1 rounded-full border border-white/10 text-[#B5AD99] hover:text-[#D4A537] hover:border-[#D4A537]/60 transition-all ${
-                      speakingIdx === i ? "text-[#D4A537] border-[#D4A537]/60" : ""
+                    className={`text-[10px] inline-flex items-center gap-1 px-2 py-1 rounded-full border ai-border text-[var(--ai-fg-3)] hover:text-[var(--ai-accent)] hover:border-[var(--ai-accent)]/60 transition-all ${
+                      speakingIdx === i ? "text-[var(--ai-accent)] border-[var(--ai-accent)]/60" : ""
                     }`}
                     data-testid={`msg-tts-${i}`}
                   >
@@ -216,7 +216,7 @@ const ChatPanel = forwardRef(function ChatPanel({ onIntent, onExtract }, ref) {
 
         {busy && (
           <div className="flex justify-start" data-testid="chat-loader">
-            <div className="rounded-2xl px-4 py-3 border border-white/10 bg-white/[0.04] text-[#B5AD99] flex items-center gap-2">
+            <div className="rounded-2xl px-4 py-3 border ai-border ai-surface text-[var(--ai-fg-3)] flex items-center gap-2">
               <Loader2 className="h-4 w-4 animate-spin" /> Thinking...
             </div>
           </div>
@@ -229,7 +229,7 @@ const ChatPanel = forwardRef(function ChatPanel({ onIntent, onExtract }, ref) {
             key={s}
             onClick={() => send(s)}
             disabled={busy}
-            className="text-xs rounded-full border border-white/10 px-3 py-1.5 text-[#D4CDB6] hover:border-[#D4A537]/60 hover:bg-white/[0.05] transition-all disabled:opacity-40"
+            className="text-xs rounded-full border ai-border px-3 py-1.5 text-[var(--ai-fg-2)] hover:border-[var(--ai-accent)]/60 hover:ai-surface-hover transition-all disabled:opacity-40"
             data-testid={`chip-${s.toLowerCase().replace(/\s+/g, "-")}`}
           >
             {s}
@@ -242,7 +242,7 @@ const ChatPanel = forwardRef(function ChatPanel({ onIntent, onExtract }, ref) {
           e.preventDefault();
           send();
         }}
-        className={`p-4 pr-4 pb-16 md:pb-16 md:pr-56 border-t border-white/10 flex items-center gap-2 transition-all duration-300 ${
+        className={`p-4 pr-4 pb-16 md:pb-16 md:pr-56 border-t ai-border flex items-center gap-2 transition-all duration-300 ${
           input ? "bg-white/[0.02]" : ""
         }`}
         style={
@@ -258,8 +258,8 @@ const ChatPanel = forwardRef(function ChatPanel({ onIntent, onExtract }, ref) {
           disabled={busy}
           className={`shrink-0 h-11 w-11 rounded-full flex items-center justify-center border transition-all ${
             listening
-              ? "border-[#D4A537] bg-[#D4A537]/20 text-[#D4A537] animate-pulse"
-              : "border-white/10 text-[#B5AD99] hover:border-[#D4A537]/60 hover:text-[#D4A537]"
+              ? "border-[var(--ai-accent)] bg-[var(--ai-accent)]/20 text-[var(--ai-accent)] animate-pulse"
+              : "ai-border text-[var(--ai-fg-3)] hover:border-[var(--ai-accent)]/60 hover:text-[var(--ai-accent)]"
           }`}
           data-testid="chat-mic-btn"
           aria-label={listening ? "Stop listening" : "Start voice input"}
@@ -270,15 +270,15 @@ const ChatPanel = forwardRef(function ChatPanel({ onIntent, onExtract }, ref) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={listening ? "Listening..." : "Ask about care services..."}
-          className="flex-1 min-w-0 bg-white/[0.04] border border-white/10 rounded-full px-5 py-3 text-[#F0EADB] placeholder:text-white/30 outline-none focus:border-[#D4A537]"
+          className="flex-1 min-w-0 ai-surface border ai-border rounded-full px-5 py-3 text-[var(--ai-fg)] placeholder: outline-none focus:border-[var(--ai-accent)]"
           data-testid="chat-input"
           disabled={busy}
         />
         <button
           type="submit"
           disabled={busy || !input.trim()}
-          className="shrink-0 h-11 w-11 rounded-full flex items-center justify-center text-[#1A1F1B] disabled:opacity-40"
-          style={{ background: "linear-gradient(135deg, #D4A537, #C9A227)" }}
+          className="shrink-0 h-11 w-11 rounded-full flex items-center justify-center text-[var(--ai-ink)] disabled:opacity-40"
+          style={{ background: "linear-gradient(135deg, var(--ai-accent), var(--ai-accent-2))" }}
           data-testid="chat-send-btn"
           aria-label="Send"
         >

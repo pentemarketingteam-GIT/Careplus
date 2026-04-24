@@ -33,7 +33,7 @@ export default function Testimonials({ variant = "light" }) {
             transition={{ duration: 0.6, delay: i * 0.08 }}
             className={
               dark
-                ? "relative rounded-3xl p-8 border border-white/10 bg-white/[0.03]"
+                ? "relative rounded-3xl p-8 border ai-border ai-surface-2"
                 : "relative rounded-3xl p-8 soft-card"
             }
             data-testid={`testimonial-${t.id}`}
@@ -42,7 +42,7 @@ export default function Testimonials({ variant = "light" }) {
               className="absolute -top-6 left-8 h-12 w-12 rounded-full flex items-center justify-center font-display text-xl"
               style={{
                 background: dark ? "rgba(212,165,55,0.18)" : "hsl(var(--bg-secondary))",
-                color: dark ? "#D4A537" : "hsl(var(--accent))",
+                color: dark ? "var(--ai-accent)" : "hsl(var(--accent))",
                 border: dark ? "1px solid rgba(212,165,55,0.4)" : "1px solid hsl(var(--soft-border))",
               }}
             >
@@ -50,7 +50,7 @@ export default function Testimonials({ variant = "light" }) {
             </div>
             <blockquote
               className={`serif-italic text-lg leading-relaxed mt-4 ${
-                dark ? "text-[#E5DEC8]" : "text-[hsl(var(--text-secondary))]"
+                dark ? "text-[var(--ai-quote)]" : "text-[hsl(var(--text-secondary))]"
               }`}
             >
               "{t.quote}"
@@ -59,7 +59,7 @@ export default function Testimonials({ variant = "light" }) {
               {Array.from({ length: t.rating }).map((_, idx) => (
                 <Star
                   key={idx}
-                  className="h-4 w-4 fill-[#D4A537] text-[#D4A537]"
+                  className="h-4 w-4 fill-[var(--ai-accent)] text-[var(--ai-accent)]"
                   strokeWidth={1.2}
                 />
               ))}
@@ -67,14 +67,14 @@ export default function Testimonials({ variant = "light" }) {
             <div className="mt-5">
               <div
                 className={`font-semibold ${
-                  dark ? "text-[#F0EADB]" : "text-[hsl(var(--text-primary))]"
+                  dark ? "text-[var(--ai-fg)]" : "text-[hsl(var(--text-primary))]"
                 }`}
               >
                 {t.name}
               </div>
               <div
                 className={`text-sm ${
-                  dark ? "text-[#B5AD99]" : "text-[hsl(var(--text-secondary))]"
+                  dark ? "text-[var(--ai-fg-3)]" : "text-[hsl(var(--text-secondary))]"
                 }`}
               >
                 {t.role}

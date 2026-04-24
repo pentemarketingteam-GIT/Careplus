@@ -25,9 +25,9 @@ function TeamCard({ member, idx }) {
       data-testid={`team-card-${member.id}`}
     >
       <motion.div
-        className="absolute inset-0 rounded-2xl border border-white/10 p-5"
+        className="absolute inset-0 rounded-2xl border ai-border p-5"
         style={{
-          background: "rgba(255,255,255,0.04)",
+          background: "var(--ai-surface)",
           transformStyle: "preserve-3d",
         }}
         animate={{ rotateY: flipped ? 180 : 0 }}
@@ -49,11 +49,11 @@ function TeamCard({ member, idx }) {
               .join("")}
           </div>
           <div>
-            <div className="font-display text-2xl text-[#F0EADB]">{member.name}</div>
-            <div className="text-xs tracking-[0.18em] uppercase text-[#D4A537] mt-1">
+            <div className="font-display text-2xl text-[var(--ai-fg)]">{member.name}</div>
+            <div className="text-xs tracking-[0.18em] uppercase text-[var(--ai-accent)] mt-1">
               {member.role}
             </div>
-            <div className="text-[10px] text-[#B5AD99] mt-2">Tap to read bio →</div>
+            <div className="text-[10px] text-[var(--ai-fg-3)] mt-2">Tap to read bio →</div>
           </div>
         </div>
         {/* Back */}
@@ -66,8 +66,8 @@ function TeamCard({ member, idx }) {
             border: "1px solid rgba(212,165,55,0.3)",
           }}
         >
-          <div className="text-[#F0EADB] leading-relaxed">{member.bio}</div>
-          <div className="text-[10px] text-[#B5AD99] mt-4">Tap to flip back ←</div>
+          <div className="text-[var(--ai-fg)] leading-relaxed">{member.bio}</div>
+          <div className="text-[10px] text-[var(--ai-fg-3)] mt-4">Tap to flip back ←</div>
         </div>
       </motion.div>
     </motion.div>

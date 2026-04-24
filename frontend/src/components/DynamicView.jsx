@@ -109,7 +109,7 @@ function resolveView(intent) {
 
 function Frame({ children }) {
   return (
-    <div className="min-h-full w-full flex flex-col items-center justify-start px-8 md:px-16 py-20 text-[#F0EADB]">
+    <div className="min-h-full w-full flex flex-col items-center justify-start px-8 md:px-16 py-20 text-[var(--ai-fg)]">
       <div className="max-w-4xl w-full">{children}</div>
     </div>
   );
@@ -117,7 +117,7 @@ function Frame({ children }) {
 
 function SectionLabel({ children }) {
   return (
-    <div className="text-[11px] tracking-[0.28em] uppercase font-semibold text-[#D4A537]">
+    <div className="text-[11px] tracking-[0.28em] uppercase font-semibold text-[var(--ai-accent)]">
       {children}
     </div>
   );
@@ -142,24 +142,24 @@ function WelcomeView({ onAction }) {
         transition={{ duration: 0.8 }}
       >
         <div
-          className="h-20 w-20 mx-auto rounded-2xl border border-white/15 flex items-center justify-center mb-10"
+          className="h-20 w-20 mx-auto rounded-2xl border ai-border flex items-center justify-center mb-10"
           style={{ background: "linear-gradient(135deg, rgba(212,165,55,0.25), rgba(107,142,78,0.15))" }}
         >
-          <span className="font-display text-3xl text-[#F0EADB]">c+</span>
+          <span className="font-display text-3xl text-[var(--ai-fg)]">c+</span>
         </div>
       </motion.div>
       <h1 className="font-display text-6xl md:text-7xl leading-[1.02] text-center">
-        Welcome to <span className="text-[#D4A537] serif-italic">CarePlus</span>
+        Welcome to <span className="text-[var(--ai-accent)] serif-italic">CarePlus</span>
       </h1>
-      <p className="mt-8 text-center text-xl text-[#B5AD99]">Your personalized healthcare experience.</p>
-      <p className="mt-2 text-center text-xl text-[#B5AD99]">Ask our AI assistant anything to get started.</p>
+      <p className="mt-8 text-center text-xl text-[var(--ai-fg-3)]">Your personalized healthcare experience.</p>
+      <p className="mt-2 text-center text-xl text-[var(--ai-fg-3)]">Ask our AI assistant anything to get started.</p>
 
-      <div className="mt-16 flex flex-wrap justify-center gap-3 text-sm text-[#B5AD99]">
+      <div className="mt-16 flex flex-wrap justify-center gap-3 text-sm text-[var(--ai-fg-3)]">
         {chips.map((s) => (
           <button
             key={s}
             onClick={() => onAction?.({ type: "prompt", value: s })}
-            className="rounded-full px-4 py-2 border border-white/10 hover:border-[#D4A537]/60 hover:text-[#F0EADB] hover:bg-white/[0.04] transition-all"
+            className="rounded-full px-4 py-2 border ai-border hover:border-[var(--ai-accent)]/60 hover:text-[var(--ai-fg)] hover:ai-surface transition-all"
             data-testid={`welcome-suggestion-${s.slice(0, 10).replace(/\s+/g, "-")}`}
           >
             Try asking: {s}
@@ -185,14 +185,14 @@ function ServiceDetailView({ slug }) {
           className="h-14 w-14 rounded-2xl flex items-center justify-center"
           style={{ background: "rgba(212,165,55,0.2)", border: "1px solid rgba(212,165,55,0.4)" }}
         >
-          <Icon className="h-7 w-7 text-[#D4A537]" strokeWidth={1.4} />
+          <Icon className="h-7 w-7 text-[var(--ai-accent)]" strokeWidth={1.4} />
         </div>
         <h2 className="font-display text-5xl md:text-6xl leading-tight">{s.name}</h2>
       </div>
 
       <div className="grid md:grid-cols-5 gap-8 mt-10 items-center">
         <div className="md:col-span-3">
-          <p className="text-xl leading-relaxed text-[#C5BFA8]">{s.desc}</p>
+          <p className="text-xl leading-relaxed text-[var(--ai-fg-2)]">{s.desc}</p>
           <div className="mt-8 grid sm:grid-cols-3 gap-3 text-sm">
             {[
               { icon: <ShieldCheck className="h-4 w-4" />, label: "Licensed & insured" },
@@ -201,9 +201,9 @@ function ServiceDetailView({ slug }) {
             ].map((b) => (
               <div
                 key={b.label}
-                className="flex items-center gap-2 rounded-xl border border-white/10 px-4 py-3 text-[#D4CDB6]"
+                className="flex items-center gap-2 rounded-xl border ai-border px-4 py-3 text-[var(--ai-fg-2)]"
               >
-                <span className="text-[#D4A537]">{b.icon}</span> {b.label}
+                <span className="text-[var(--ai-accent)]">{b.icon}</span> {b.label}
               </div>
             ))}
           </div>
@@ -223,23 +223,23 @@ function ServiceDetailView({ slug }) {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
-        className="mt-12 rounded-3xl border border-white/10 p-8 relative bg-white/[0.03]"
+        className="mt-12 rounded-3xl border ai-border p-8 relative ai-surface-2"
       >
         <div
           className="absolute -top-5 left-8 h-10 w-10 rounded-full flex items-center justify-center font-display"
-          style={{ background: "rgba(212,165,55,0.2)", color: "#D4A537", border: "1px solid rgba(212,165,55,0.4)" }}
+          style={{ background: "rgba(212,165,55,0.2)", color: "var(--ai-accent)", border: "1px solid rgba(212,165,55,0.4)" }}
         >
           {t.initial}
         </div>
-        <blockquote className="serif-italic text-lg text-[#E5DEC8] leading-relaxed">"{t.quote}"</blockquote>
+        <blockquote className="serif-italic text-lg text-[var(--ai-quote)] leading-relaxed">"{t.quote}"</blockquote>
         <figcaption className="mt-4 flex items-center justify-between">
           <div>
-            <div className="font-semibold text-[#F0EADB]">{t.name}</div>
-            <div className="text-sm text-[#B5AD99]">{t.role}</div>
+            <div className="font-semibold text-[var(--ai-fg)]">{t.name}</div>
+            <div className="text-sm text-[var(--ai-fg-3)]">{t.role}</div>
           </div>
           <div className="flex">
             {Array.from({ length: t.rating }).map((_, i) => (
-              <Star key={i} className="h-4 w-4 fill-[#D4A537] text-[#D4A537]" strokeWidth={1.2} />
+              <Star key={i} className="h-4 w-4 fill-[var(--ai-accent)] text-[var(--ai-accent)]" strokeWidth={1.2} />
             ))}
           </div>
         </figcaption>
@@ -259,16 +259,16 @@ function ServicesGridView() {
           return (
             <div
               key={s.slug}
-              className="rounded-2xl p-6 border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] transition-colors"
+              className="rounded-2xl p-6 border ai-border ai-surface-2 hover:ai-surface-hover transition-colors"
             >
               <div
                 className="h-10 w-10 rounded-xl flex items-center justify-center mb-4"
                 style={{ background: "rgba(212,165,55,0.2)" }}
               >
-                <Icon className="h-5 w-5 text-[#D4A537]" strokeWidth={1.4} />
+                <Icon className="h-5 w-5 text-[var(--ai-accent)]" strokeWidth={1.4} />
               </div>
               <div className="font-display text-2xl">{s.name}</div>
-              <p className="text-sm text-[#B5AD99] mt-2 leading-relaxed">{s.desc}</p>
+              <p className="text-sm text-[var(--ai-fg-3)] mt-2 leading-relaxed">{s.desc}</p>
             </div>
           );
         })}
@@ -282,17 +282,17 @@ function AboutView() {
     <Frame>
       <SectionLabel>About Us</SectionLabel>
       <h2 className="font-display text-5xl md:text-6xl mt-4 leading-tight">
-        <span className="text-[#D4A537] serif-italic">Compassion</span> in every action.
+        <span className="text-[var(--ai-accent)] serif-italic">Compassion</span> in every action.
       </h2>
-      <p className="mt-6 text-lg text-[#C5BFA8] max-w-3xl leading-relaxed">
+      <p className="mt-6 text-lg text-[var(--ai-fg-2)] max-w-3xl leading-relaxed">
         {BRAND.name} is a dedicated home health care provider serving Dallas and surrounding counties. We work closely with patients, families, and physicians to deliver care that's thoughtful, dignified, and deeply personal.
       </p>
 
       <div className="mt-10 grid md:grid-cols-2 gap-4">
         {ABOUT_POINTS.map((p) => (
-          <div key={p} className="flex items-start gap-3 rounded-xl border border-white/10 p-4 bg-white/[0.03]">
-            <span className="mt-1.5 h-1.5 w-5 rounded-full bg-[#D4A537]" />
-            <span className="text-[#D4CDB6]">{p}</span>
+          <div key={p} className="flex items-start gap-3 rounded-xl border ai-border p-4 ai-surface-2">
+            <span className="mt-1.5 h-1.5 w-5 rounded-full bg-[var(--ai-accent)]" />
+            <span className="text-[var(--ai-fg-2)]">{p}</span>
           </div>
         ))}
       </div>
@@ -311,7 +311,7 @@ function ContactView() {
     <Frame>
       <SectionLabel>Contact</SectionLabel>
       <h2 className="font-display text-5xl md:text-6xl mt-4">Let's talk.</h2>
-      <p className="mt-5 text-lg text-[#C5BFA8] max-w-2xl">
+      <p className="mt-5 text-lg text-[var(--ai-fg-2)] max-w-2xl">
         Reach us directly — we usually respond within one business day. Your conversation with the AI assistant can also be turned into an appointment request.
       </p>
       <div className="mt-10 grid sm:grid-cols-2 gap-4">
@@ -340,16 +340,16 @@ function CareersView() {
     <Frame>
       <SectionLabel>Careers</SectionLabel>
       <h2 className="font-display text-5xl md:text-6xl mt-4">
-        Do the work that <span className="serif-italic text-[#D4A537]">matters</span>.
+        Do the work that <span className="serif-italic text-[var(--ai-accent)]">matters</span>.
       </h2>
-      <p className="mt-5 text-lg text-[#C5BFA8] max-w-2xl">
+      <p className="mt-5 text-lg text-[var(--ai-fg-2)] max-w-2xl">
         Join clinicians and caregivers who believe great care is personal. Hiring across North Texas.
       </p>
-      <div className="mt-10 divide-y divide-white/10 border border-white/10 rounded-2xl bg-white/[0.03]">
+      <div className="mt-10 divide-y  border ai-border rounded-2xl ai-surface-2">
         {OPENINGS.map((o) => (
           <div key={o} className="p-5 flex items-center justify-between">
             <div className="font-display text-xl">{o}</div>
-            <a href={BRAND.phoneHref} className="text-[#D4A537] text-sm inline-flex items-center gap-2 hover:text-[#F0EADB]">
+            <a href={BRAND.phoneHref} className="text-[var(--ai-accent)] text-sm inline-flex items-center gap-2 hover:text-[var(--ai-fg)]">
               Apply <ArrowRight className="h-4 w-4" strokeWidth={1.5} />
             </a>
           </div>
@@ -364,7 +364,7 @@ function BookView() {
     <Frame>
       <SectionLabel>Book Appointment</SectionLabel>
       <h2 className="font-display text-5xl md:text-6xl mt-4">Schedule your visit.</h2>
-      <p className="mt-5 text-lg text-[#C5BFA8] max-w-2xl">
+      <p className="mt-5 text-lg text-[var(--ai-fg-2)] max-w-2xl">
         Tell the assistant your preferred date and service — or use the form below. We'll reach out within one business day.
       </p>
       <AppointmentForm />
@@ -377,7 +377,7 @@ function ReferralView() {
     <Frame>
       <SectionLabel>Submit Referral</SectionLabel>
       <h2 className="font-display text-5xl md:text-6xl mt-4">Refer a patient.</h2>
-      <p className="mt-5 text-lg text-[#C5BFA8] max-w-2xl">
+      <p className="mt-5 text-lg text-[var(--ai-fg-2)] max-w-2xl">
         Share a recommendation — our intake team will follow up discreetly.
       </p>
       <ReferralForm />
@@ -390,7 +390,7 @@ function FeedbackView() {
     <Frame>
       <SectionLabel>Your Feedback</SectionLabel>
       <h2 className="font-display text-5xl md:text-6xl mt-4">Share your experience.</h2>
-      <p className="mt-5 text-lg text-[#C5BFA8] max-w-2xl">
+      <p className="mt-5 text-lg text-[var(--ai-fg-2)] max-w-2xl">
         Your voice helps us deliver better care. Rate your experience and tell us what we can improve.
       </p>
       <FeedbackForm />
@@ -403,9 +403,9 @@ function MeetTeamView() {
     <Frame>
       <SectionLabel>Meet the Team</SectionLabel>
       <h2 className="font-display text-5xl md:text-6xl mt-4">
-        The people behind your <span className="serif-italic text-[#D4A537]">care plan</span>.
+        The people behind your <span className="serif-italic text-[var(--ai-accent)]">care plan</span>.
       </h2>
-      <p className="mt-5 text-lg text-[#C5BFA8] max-w-2xl">
+      <p className="mt-5 text-lg text-[var(--ai-fg-2)] max-w-2xl">
         Tap a card to read each clinician's story.
       </p>
       <TeamCards />
@@ -418,9 +418,9 @@ function TourVisitView() {
     <Frame>
       <SectionLabel>A Typical Home Visit</SectionLabel>
       <h2 className="font-display text-5xl md:text-6xl mt-4">
-        What to <span className="serif-italic text-[#D4A537]">expect</span>.
+        What to <span className="serif-italic text-[var(--ai-accent)]">expect</span>.
       </h2>
-      <p className="mt-5 text-lg text-[#C5BFA8] max-w-2xl">
+      <p className="mt-5 text-lg text-[var(--ai-fg-2)] max-w-2xl">
         Every visit follows a calm, consistent rhythm — here's how it unfolds.
       </p>
       <TourCards />
@@ -433,9 +433,9 @@ function SymptomCheckView({ onAction }) {
     <Frame>
       <SectionLabel>Where does it hurt?</SectionLabel>
       <h2 className="font-display text-5xl md:text-6xl mt-4">
-        Tap a region for a <span className="serif-italic text-[#D4A537]">care suggestion</span>.
+        Tap a region for a <span className="serif-italic text-[var(--ai-accent)]">care suggestion</span>.
       </h2>
-      <p className="mt-5 text-lg text-[#C5BFA8] max-w-2xl">
+      <p className="mt-5 text-lg text-[var(--ai-fg-2)] max-w-2xl">
         A quick way to see which service might help — not a diagnosis.
       </p>
       <div className="mt-10 flex justify-center">
@@ -465,9 +465,9 @@ function FindCareView({ onAction }) {
     <Frame>
       <SectionLabel>Find the Right Care</SectionLabel>
       <h2 className="font-display text-5xl md:text-6xl mt-4">
-        What brings you <span className="serif-italic text-[#D4A537]">here today</span>?
+        What brings you <span className="serif-italic text-[var(--ai-accent)]">here today</span>?
       </h2>
-      <p className="mt-5 text-lg text-[#C5BFA8] max-w-2xl">Pick what resonates most — the AI will guide you from there.</p>
+      <p className="mt-5 text-lg text-[var(--ai-fg-2)] max-w-2xl">Pick what resonates most — the AI will guide you from there.</p>
       <div className="mt-10 grid sm:grid-cols-2 gap-4">
         {steps.map((s, i) => (
           <motion.button
@@ -476,11 +476,11 @@ function FindCareView({ onAction }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: i * 0.05 }}
             onClick={() => onAction?.({ type: "prompt", value: s.v })}
-            className="text-left rounded-2xl p-6 border border-white/10 bg-white/[0.03] hover:border-[#D4A537]/60 hover:bg-white/[0.08] transition-all"
+            className="text-left rounded-2xl p-6 border ai-border ai-surface-2 hover:border-[var(--ai-accent)]/60 hover:ai-track transition-all"
             data-testid={`find-care-${i}`}
           >
-            <div className="font-display text-2xl text-[#F0EADB]">{s.q}</div>
-            <div className="text-sm text-[#B5AD99] mt-2 flex items-center gap-2">
+            <div className="font-display text-2xl text-[var(--ai-fg)]">{s.q}</div>
+            <div className="text-sm text-[var(--ai-fg-3)] mt-2 flex items-center gap-2">
               Explore <ArrowRight className="h-4 w-4" strokeWidth={1.5} />
             </div>
           </motion.button>
@@ -493,14 +493,14 @@ function FindCareView({ onAction }) {
 function InfoCard({ icon, label, value, href }) {
   const inner = (
     <>
-      <div className="flex items-center gap-2 text-[#D4A537]">
+      <div className="flex items-center gap-2 text-[var(--ai-accent)]">
         {icon}
         <span className="text-[11px] tracking-[0.22em] uppercase font-semibold">{label}</span>
       </div>
-      <div className="mt-2 text-xl font-display text-[#F0EADB]">{value}</div>
+      <div className="mt-2 text-xl font-display text-[var(--ai-fg)]">{value}</div>
     </>
   );
-  const cls = "rounded-2xl border border-white/10 p-5 bg-white/[0.03] hover:bg-white/[0.06] transition-colors block";
+  const cls = "rounded-2xl border ai-border p-5 ai-surface-2 hover:ai-surface-hover transition-colors block";
   return href ? (
     <a href={href} className={cls}>
       {inner}
@@ -515,11 +515,11 @@ function InfoCard({ icon, label, value, href }) {
 function DarkField({ label, testid, ...props }) {
   return (
     <div>
-      <div className="text-xs text-[#B5AD99] mb-1.5 tracking-wide">{label}</div>
+      <div className="text-xs text-[var(--ai-fg-3)] mb-1.5 tracking-wide">{label}</div>
       <input
         {...props}
         data-testid={testid}
-        className="w-full rounded-xl px-4 py-3 bg-white/[0.04] border border-white/10 text-[#F0EADB] placeholder:text-white/30 outline-none focus:border-[#D4A537] focus:bg-white/[0.08] transition-all"
+        className="w-full rounded-xl px-4 py-3 ai-surface border ai-border text-[var(--ai-fg)] placeholder: outline-none focus:border-[var(--ai-accent)] focus:ai-track transition-all"
       />
     </div>
   );
@@ -553,13 +553,13 @@ function AppointmentForm() {
       <DarkField label="Preferred date" type="date" value={f.preferred_date} onChange={(e) => setF({ ...f, preferred_date: e.target.value })} testid="appt-date" />
       <DarkField label="Service" placeholder="e.g. Skilled Nursing" value={f.service} onChange={(e) => setF({ ...f, service: e.target.value })} testid="appt-service" />
       <div className="md:col-span-2">
-        <div className="text-xs text-[#B5AD99] mb-1.5 tracking-wide">Notes</div>
+        <div className="text-xs text-[var(--ai-fg-3)] mb-1.5 tracking-wide">Notes</div>
         <textarea
           rows={4}
           value={f.notes}
           onChange={(e) => setF({ ...f, notes: e.target.value })}
           data-testid="appt-notes"
-          className="w-full rounded-xl px-4 py-3 bg-white/[0.04] border border-white/10 text-[#F0EADB] outline-none focus:border-[#D4A537]"
+          className="w-full rounded-xl px-4 py-3 ai-surface border ai-border text-[var(--ai-fg)] outline-none focus:border-[var(--ai-accent)]"
         />
       </div>
       <button disabled={busy} className="btn-accent md:col-span-2" data-testid="appt-submit-btn">
@@ -595,13 +595,13 @@ function ReferralForm() {
       <DarkField label="Patient name *" value={f.patient_name} onChange={(e) => setF({ ...f, patient_name: e.target.value })} testid="dref-patient" required />
       <DarkField label="Condition" value={f.patient_condition} onChange={(e) => setF({ ...f, patient_condition: e.target.value })} testid="dref-condition" />
       <div className="md:col-span-2">
-        <div className="text-xs text-[#B5AD99] mb-1.5 tracking-wide">Notes</div>
+        <div className="text-xs text-[var(--ai-fg-3)] mb-1.5 tracking-wide">Notes</div>
         <textarea
           rows={4}
           value={f.notes}
           onChange={(e) => setF({ ...f, notes: e.target.value })}
           data-testid="dref-notes"
-          className="w-full rounded-xl px-4 py-3 bg-white/[0.04] border border-white/10 text-[#F0EADB] outline-none focus:border-[#D4A537]"
+          className="w-full rounded-xl px-4 py-3 ai-surface border ai-border text-[var(--ai-fg)] outline-none focus:border-[var(--ai-accent)]"
         />
       </div>
       <button disabled={busy} className="btn-accent md:col-span-2" data-testid="dref-submit-btn">
@@ -640,12 +640,12 @@ function FeedbackForm() {
         <DarkField label="Email" type="email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} testid="dfb-email" />
       </div>
       <div>
-        <div className="text-xs text-[#B5AD99] mb-2 tracking-wide">Rating</div>
+        <div className="text-xs text-[var(--ai-fg-3)] mb-2 tracking-wide">Rating</div>
         <div className="flex gap-2">
           {[1, 2, 3, 4, 5].map((n) => (
             <button key={n} type="button" onClick={() => setF({ ...f, rating: n })} data-testid={`dfb-star-${n}`}>
               <Star
-                className={`h-6 w-6 ${n <= f.rating ? "fill-[#D4A537] text-[#D4A537]" : "text-white/25"}`}
+                className={`h-6 w-6 ${n <= f.rating ? "fill-[var(--ai-accent)] text-[var(--ai-accent)]" : ""}`}
                 strokeWidth={1.3}
               />
             </button>
@@ -653,13 +653,13 @@ function FeedbackForm() {
         </div>
       </div>
       <div>
-        <div className="text-xs text-[#B5AD99] mb-1.5 tracking-wide">Your feedback</div>
+        <div className="text-xs text-[var(--ai-fg-3)] mb-1.5 tracking-wide">Your feedback</div>
         <textarea
           rows={5}
           value={f.feedback}
           onChange={(e) => setF({ ...f, feedback: e.target.value })}
           data-testid="dfb-feedback"
-          className="w-full rounded-xl px-4 py-3 bg-white/[0.04] border border-white/10 text-[#F0EADB] outline-none focus:border-[#D4A537]"
+          className="w-full rounded-xl px-4 py-3 ai-surface border ai-border text-[var(--ai-fg)] outline-none focus:border-[var(--ai-accent)]"
           required
         />
       </div>
@@ -676,9 +676,9 @@ function IntakeView({ sessionId, refreshTick, onAction }) {
     <Frame>
       <SectionLabel>Patient Intake</SectionLabel>
       <h2 className="font-display text-5xl md:text-6xl mt-4">
-        Let's get you <span className="serif-italic text-[#D4A537]">set up</span>.
+        Let's get you <span className="serif-italic text-[var(--ai-accent)]">set up</span>.
       </h2>
-      <p className="mt-5 text-lg text-[#C5BFA8] max-w-2xl">
+      <p className="mt-5 text-lg text-[var(--ai-fg-2)] max-w-2xl">
         Chat with the AI on the right (voice or text) — your answers auto-fill the form below. Or type directly into any field.
       </p>
       <IntakeWizard sessionId={sessionId} refreshTick={refreshTick} onAction={onAction} />

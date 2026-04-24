@@ -14,7 +14,7 @@ export default function BodyDiagram({ onPick }) {
         className="max-w-md w-full h-auto drop-shadow-[0_20px_40px_rgba(212,165,55,0.15)]"
       >
         {/* Simple stylized body silhouette */}
-        <g stroke="#D4A537" strokeWidth="1.5" fill="rgba(212,165,55,0.04)">
+        <g stroke="var(--ai-accent)" strokeWidth="1.5" fill="rgba(212,165,55,0.04)">
           {/* head */}
           <ellipse cx="250" cy="60" rx="38" ry="44" />
           {/* neck */}
@@ -47,7 +47,7 @@ export default function BodyDiagram({ onPick }) {
                 cy={r.cy}
                 r={r.r}
                 fill={isHover ? "rgba(212,165,55,0.25)" : "rgba(212,165,55,0.08)"}
-                stroke="#D4A537"
+                stroke="var(--ai-accent)"
                 strokeWidth={isHover ? "2" : "1"}
                 strokeDasharray={isHover ? "0" : "3 3"}
                 initial={false}
@@ -67,7 +67,7 @@ export default function BodyDiagram({ onPick }) {
                   fontSize="11"
                   fontFamily="Manrope, sans-serif"
                   fontWeight="600"
-                  fill="#F0EADB"
+                  fill="var(--ai-fg)"
                   style={{ pointerEvents: "none" }}
                 >
                   {r.label}
@@ -77,7 +77,7 @@ export default function BodyDiagram({ onPick }) {
           );
         })}
       </svg>
-      <p className="mt-6 text-sm text-[#B5AD99] text-center max-w-md">
+      <p className="mt-6 text-sm text-[var(--ai-fg-3)] text-center max-w-md">
         Tap any region to get a personalized care suggestion.
       </p>
     </div>

@@ -11,18 +11,18 @@ export default function TourCards() {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.6, delay: i * 0.1 }}
-          className="flex items-start gap-5 rounded-2xl p-6 border border-white/10 bg-white/[0.03]"
+          className="flex items-start gap-5 rounded-2xl p-6 border ai-border ai-surface-2"
           data-testid={`tour-step-${t.step}`}
         >
           <div
-            className="h-14 w-14 shrink-0 rounded-2xl flex items-center justify-center font-display text-2xl text-[#1A1F1B]"
-            style={{ background: "linear-gradient(135deg, #D4A537, #C9A227)" }}
+            className="h-14 w-14 shrink-0 rounded-2xl flex items-center justify-center font-display text-2xl text-[var(--ai-ink)]"
+            style={{ background: "linear-gradient(135deg, var(--ai-accent), var(--ai-accent-2))" }}
           >
             {t.step}
           </div>
           <div>
-            <div className="font-display text-2xl text-[#F0EADB]">{t.title}</div>
-            <p className="text-[#C5BFA8] mt-2 leading-relaxed">{t.desc}</p>
+            <div className="font-display text-2xl text-[var(--ai-fg)]">{t.title}</div>
+            <p className="text-[var(--ai-fg-2)] mt-2 leading-relaxed">{t.desc}</p>
           </div>
         </motion.div>
       ))}

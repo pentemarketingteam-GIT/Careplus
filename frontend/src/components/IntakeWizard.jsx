@@ -82,32 +82,32 @@ export default function IntakeWizard({ sessionId, refreshTick, onAction }) {
     <div className="mt-8" data-testid="intake-wizard">
       {/* Progress */}
       <div className="flex items-center justify-between mb-3">
-        <div className="text-xs tracking-[0.22em] uppercase font-semibold text-[#D4A537]">Your intake</div>
-        <div className="text-xs text-[#B5AD99]">{pct}% complete</div>
+        <div className="text-xs tracking-[0.22em] uppercase font-semibold text-[var(--ai-accent)]">Your intake</div>
+        <div className="text-xs text-[var(--ai-fg-3)]">{pct}% complete</div>
       </div>
-      <div className="h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
+      <div className="h-1.5 rounded-full ai-track overflow-hidden">
         <motion.div
           className="h-full rounded-full"
-          style={{ background: "linear-gradient(90deg, #D4A537, #C9A227)" }}
+          style={{ background: "linear-gradient(90deg, var(--ai-accent), var(--ai-accent-2))" }}
           animate={{ width: `${pct}%` }}
           transition={{ duration: 0.5 }}
         />
       </div>
 
       {/* Save to profile banner */}
-      <div className="mt-5 rounded-xl border border-white/10 bg-white/[0.03] p-4 flex items-center gap-3">
-        <Lock className="h-4 w-4 text-[#D4A537] shrink-0" strokeWidth={1.6} />
+      <div className="mt-5 rounded-xl border ai-border ai-surface-2 p-4 flex items-center gap-3">
+        <Lock className="h-4 w-4 text-[var(--ai-accent)] shrink-0" strokeWidth={1.6} />
         {user ? (
-          <div className="text-sm text-[#D4CDB6]">
-            Signed in as <span className="font-semibold text-[#F0EADB]">{user.name}</span> — your intake will be saved to your profile.
+          <div className="text-sm text-[var(--ai-fg-2)]">
+            Signed in as <span className="font-semibold text-[var(--ai-fg)]">{user.name}</span> — your intake will be saved to your profile.
           </div>
         ) : (
-          <div className="text-sm text-[#D4CDB6] flex items-center justify-between gap-3 flex-1">
+          <div className="text-sm text-[var(--ai-fg-2)] flex items-center justify-between gap-3 flex-1">
             <span>Continue as guest, or sign in to save this intake for later.</span>
             <button
               onClick={login}
               data-testid="intake-signin-btn"
-              className="text-xs rounded-full border border-[#D4A537]/60 text-[#D4A537] hover:bg-[#D4A537]/10 px-3 py-1.5 shrink-0"
+              className="text-xs rounded-full border border-[var(--ai-accent)]/60 text-[var(--ai-accent)] hover:bg-[var(--ai-accent)]/10 px-3 py-1.5 shrink-0"
             >
               Sign in
             </button>
@@ -125,30 +125,30 @@ export default function IntakeWizard({ sessionId, refreshTick, onAction }) {
               key={f.key}
               initial={false}
               animate={{ opacity: 1 }}
-              className="rounded-xl border border-white/10 bg-white/[0.03] p-4"
+              className="rounded-xl border ai-border ai-surface-2 p-4"
               data-testid={`intake-field-${f.key}`}
             >
               <div className="flex items-center gap-2 mb-2">
                 {filled ? (
-                  <CheckCircle2 className="h-4 w-4 text-[#D4A537]" strokeWidth={1.8} />
+                  <CheckCircle2 className="h-4 w-4 text-[var(--ai-accent)]" strokeWidth={1.8} />
                 ) : (
-                  <Circle className="h-4 w-4 text-white/30" strokeWidth={1.5} />
+                  <Circle className="h-4 w-4 " strokeWidth={1.5} />
                 )}
-                <div className="text-xs tracking-wide text-[#B5AD99]">
+                <div className="text-xs tracking-wide text-[var(--ai-fg-3)]">
                   {f.label}
-                  {f.required && <span className="text-[#D4A537]"> *</span>}
+                  {f.required && <span className="text-[var(--ai-accent)]"> *</span>}
                 </div>
               </div>
               {f.type === "select" ? (
                 <select
                   value={val}
                   onChange={(e) => update(f.key, e.target.value)}
-                  className="w-full rounded-lg px-3 py-2 bg-white/[0.04] border border-white/10 text-[#F0EADB] outline-none focus:border-[#D4A537]"
+                  className="w-full rounded-lg px-3 py-2 ai-surface border ai-border text-[var(--ai-fg)] outline-none focus:border-[var(--ai-accent)]"
                   data-testid={`intake-select-${f.key}`}
                 >
-                  <option value="" style={{ background: "#0A1410" }}>—</option>
+                  <option value="" style={{ background: "var(--ai-bg)" }}>—</option>
                   {f.options.map((o) => (
-                    <option key={o} value={o} style={{ background: "#0A1410" }}>
+                    <option key={o} value={o} style={{ background: "var(--ai-bg)" }}>
                       {o}
                     </option>
                   ))}
@@ -158,7 +158,7 @@ export default function IntakeWizard({ sessionId, refreshTick, onAction }) {
                   type={f.type}
                   value={val}
                   onChange={(e) => update(f.key, e.target.value)}
-                  className="w-full rounded-lg px-3 py-2 bg-white/[0.04] border border-white/10 text-[#F0EADB] outline-none focus:border-[#D4A537]"
+                  className="w-full rounded-lg px-3 py-2 ai-surface border ai-border text-[var(--ai-fg)] outline-none focus:border-[var(--ai-accent)]"
                   data-testid={`intake-input-${f.key}`}
                 />
               )}
@@ -183,7 +183,7 @@ export default function IntakeWizard({ sessionId, refreshTick, onAction }) {
           </motion.button>
         )}
       </AnimatePresence>
-      <p className="mt-4 text-xs text-[#B5AD99]">
+      <p className="mt-4 text-xs text-[var(--ai-fg-3)]">
         Keep chatting with the AI — answers you give will auto-fill this form.
       </p>
     </div>

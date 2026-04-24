@@ -162,3 +162,67 @@
         display: contents !important;
     }
 }
+
+/* ============ AI Dynamic mode themes (scoped to /ai) ============ */
+.ai-root {
+    /* Defaults apply to dark */
+    --ai-bg: #0A1410;
+    --ai-bg-top: rgba(10,20,16,0.85);
+    --ai-menu: #0F1A14;
+    --ai-fg: #F0EADB;
+    --ai-fg-2: #C5BFA8;
+    --ai-fg-3: #B5AD99;
+    --ai-quote: #E5DEC8;
+    --ai-ink: #1A1F1B;
+    --ai-accent: #D4A537;
+    --ai-accent-2: #C9A227;
+    --ai-accent-3: #8F6E23;
+    --ai-deep: #2D4A2B;
+    --ai-deep-2: #1F3520;
+    --ai-moss: #6B8E4E;
+    /* Glass surfaces (on dark, lighten; on light, darken) */
+    --ai-surface-2: rgba(255,255,255,0.03);
+    --ai-surface: rgba(255,255,255,0.04);
+    --ai-surface-hover: rgba(255,255,255,0.06);
+    --ai-track: rgba(255,255,255,0.08);
+    --ai-border: rgba(255,255,255,0.10);
+    --ai-border-strong: rgba(255,255,255,0.15);
+    --ai-fade: rgba(255,255,255,0.25);
+    --ai-placeholder: rgba(255,255,255,0.30);
+    --ai-chat-bg: linear-gradient(180deg, rgba(10,20,16,0.96) 0%, rgba(8,16,12,0.98) 100%);
+}
+
+.ai-root[data-ai-theme="light"] {
+    --ai-bg: #F4F1EA;
+    --ai-bg-top: rgba(244,241,234,0.85);
+    --ai-menu: #FFFFFF;
+    --ai-fg: #1A1F1B;
+    --ai-fg-2: #4A554C;
+    --ai-fg-3: #6B7269;
+    --ai-quote: #2D4A2B;
+    --ai-ink: #1A1F1B;
+    --ai-accent: #C9A227;
+    --ai-accent-2: #A8871C;
+    --ai-accent-3: #8F6E23;
+    --ai-deep: #2D4A2B;
+    --ai-deep-2: #1F3520;
+    --ai-moss: #6B8E4E;
+    --ai-surface-2: rgba(45,74,43,0.04);
+    --ai-surface: rgba(45,74,43,0.06);
+    --ai-surface-hover: rgba(45,74,43,0.10);
+    --ai-track: rgba(45,74,43,0.12);
+    --ai-border: rgba(45,74,43,0.18);
+    --ai-border-strong: rgba(45,74,43,0.28);
+    --ai-fade: rgba(45,74,43,0.35);
+    --ai-placeholder: rgba(45,74,43,0.45);
+    --ai-chat-bg: linear-gradient(180deg, rgba(244,241,234,0.96) 0%, rgba(234,229,217,0.98) 100%);
+}
+
+/* Utility classes for AI components */
+.ai-surface { background: var(--ai-surface); }
+.ai-surface-2 { background: var(--ai-surface-2); }
+.ai-surface-hover:hover { background: var(--ai-surface-hover); }
+.ai-border { border-color: var(--ai-border); }
+.ai-text { color: var(--ai-fg); }
+.ai-text-2 { color: var(--ai-fg-2); }
+.ai-text-3 { color: var(--ai-fg-3); }
