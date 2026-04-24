@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, Circle, Send, Lock } from "lucide-react";
@@ -29,6 +29,7 @@ export default function IntakeWizard({ sessionId, refreshTick, onAction }) {
   const { user, login } = useAuth();
   const [fields, setFields] = useState({});
   const [busy, setBusy] = useState(false);
+  const noteTimers = useRef({});
 
   useEffect(() => {
     if (!sessionId) return;
@@ -50,6 +51,16 @@ export default function IntakeWizard({ sessionId, refreshTick, onAction }) {
     } catch {
       /* ignore */
     }
+    // Debounce: notify AI once the user stops typing in this field for 1.2s
+    if (noteTimers.current[key]) clearTimeout(noteTimers.current[key]);
+    noteTimers.current[key] = setTimeout(() => {
+      const v = String(value || "").trim();
+      if (!v) return;
+      axios.post(`${API}/assistant/note`, {
+        session_id: sessionId,
+        note: `User manually set ${key} to "${v}" via the form on the left.`,
+      }).catch(() => {});
+    }, 1200);
   };
 
   const completeness = () => {
@@ -68,6 +79,11 @@ export default function IntakeWizard({ sessionId, refreshTick, onAction }) {
       const hi = fields.name ? `, ${fields.name.split(" ")[0]}` : "";
       toast.success(`Thank you${hi}! Appointment request sent. We'll reach out within one business day.`);
       if (data?.logged_in) toast.success("Saved to your profile.");
+      // Tell the AI chat that the form was submitted, so it stops asking for fields
+      axios.post(`${API}/assistant/note`, {
+        session_id: sessionId,
+        note: `The patient intake form was submitted successfully. Appointment ID: ${data?.appointment_id || "created"}. Do not ask for intake fields again in this conversation.`,
+      }).catch(() => {});
       onAction?.({ type: "intake_submitted" });
     } catch (e) {
       toast.error(e?.response?.data?.detail || "Something went wrong.");

@@ -211,6 +211,13 @@ Company facts (use these confidently):
 
 Your tone: warm, concise, compassionate, and human. Answer in 2–4 short sentences unless detail is required.
 
+CRITICAL DATA-ACCURACY RULES (MUST FOLLOW):
+- NEVER invent or guess any personal details — names, phone numbers, emails, insurance IDs, dates.
+- NEVER use placeholder values (e.g. "555-123-4567", "john@example.com", "John Doe") in your replies.
+- When confirming information back to the user, quote EXACTLY what they typed, character-for-character. Do not reformat or "clean up" phone numbers.
+- If a field has not been provided yet, say "you haven't given me your [field] yet" — do NOT make one up.
+- You will be shown the CURRENT INTAKE STATE on every turn. Trust it as the source of truth. Do not ask for fields that are already filled.
+
 CRITICAL OUTPUT RULES:
 You MUST ALWAYS reply with a single valid JSON object — nothing else, no markdown, no code fences. Shape:
 {
@@ -414,8 +421,22 @@ async def assistant_chat(payload: AssistantMessage):
     context_blob = "\n".join(context_lines)
 
     user_text = payload.message
+    # Fetch current intake state and inject it as context so AI doesn't re-ask or hallucinate
+    intake_doc = await db.intakes.find_one({"session_id": session_id}, {"_id": 0})
+    intake_fields = (intake_doc or {}).get("fields", {}) or {}
+    intake_summary = ""
+    if intake_fields:
+        pairs = [f"{k}={v}" for k, v in intake_fields.items() if v]
+        if pairs:
+            intake_summary = "\n".join(pairs)
+
+    prefix_parts = []
     if context_blob:
-        user_text = f"[Recent conversation]\n{context_blob}\n\n[Current user message]\n{payload.message}"
+        prefix_parts.append(f"[Recent conversation]\n{context_blob}")
+    if intake_summary:
+        prefix_parts.append(f"[CURRENT INTAKE STATE — already collected, do NOT re-ask, quote exactly when confirming]\n{intake_summary}")
+    if prefix_parts:
+        user_text = "\n\n".join(prefix_parts) + f"\n\n[Current user message]\n{payload.message}"
 
     try:
         raw = await chat.send_message(UserMessage(text=user_text))
@@ -471,6 +492,29 @@ async def assistant_chat(payload: AssistantMessage):
 
     return AssistantReply(session_id=session_id, reply=reply_text, intent=intent,
                           suggestions=suggestions, extracted=extracted)
+
+
+class AssistantNoteRequest(BaseModel):
+    session_id: str
+    note: str  # short system note, e.g. "User manually updated phone to 555-1212"
+
+
+@api_router.post("/assistant/note")
+async def assistant_note(payload: AssistantNoteRequest):
+    """Record a non-AI system note into chat_messages so subsequent AI turns
+    are aware of user actions taken outside the chat (form edits, submits)."""
+    if not payload.session_id or not payload.note:
+        raise HTTPException(status_code=400, detail="session_id and note required")
+    rec = ChatRecord(
+        session_id=payload.session_id,
+        role="assistant",
+        content=f"[System: {payload.note}]",
+        intent=None,
+    )
+    doc = rec.model_dump()
+    doc["created_at"] = doc["created_at"].isoformat()
+    await db.chat_messages.insert_one(doc)
+    return {"ok": True}
 
 
 @api_router.get("/assistant/history/{session_id}")
